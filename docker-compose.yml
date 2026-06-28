@@ -6,12 +6,12 @@ version: "3.9"
 services:
   web:
     build:
-      context: ./packages/web
+      context: ./web
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
       - "3000:3000"
-    env_file: ./packages/web/.env
+    env_file: ./web/.env
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s
@@ -20,10 +20,10 @@ services:
 
   worker:
     build:
-      context: ./packages/worker
+      context: ./worker
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: ./packages/worker/.env
+    env_file: ./worker/.env
     healthcheck:
       test: ["CMD", "node", "dist/healthcheck.js"]
       interval: 60s
