@@ -1,0 +1,32 @@
+version: "3.9"
+
+# Para uso local apenas. No Easypanel, cada serviço é um projeto independente
+# apontando para packages/web e packages/worker como build path.
+
+services:
+  web:
+    build:
+      context: ./packages/web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file: ./packages/web/.env
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  worker:
+    build:
+      context: ./packages/worker
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./packages/worker/.env
+    healthcheck:
+      test: ["CMD", "node", "dist/healthcheck.js"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 10s
