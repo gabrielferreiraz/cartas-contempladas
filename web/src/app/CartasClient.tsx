@@ -96,7 +96,31 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
     (s, c) => s + (c.credito_atualizado ?? 0), 0,
   );
 
-  const masterRef = useRef<HTMLInputElement>(null);
+  const masterRef      = useRef<HTMLInputElement>(null);
+  const lastAnchorRef  = useRef<number | null>(null);
+
+  // Quando filtros/sort mudam, os índices mudam — âncora perde referência
+  useEffect(() => {
+    lastAnchorRef.current = null;
+  }, [filtradas]);
+
+  function handleCheckboxClick(carta: Carta, idx: number, e: React.MouseEvent<HTMLInputElement>) {
+    e.preventDefault(); // evita flip nativo; React controla pelo estado
+    if (e.shiftKey && lastAnchorRef.current !== null) {
+      const from  = Math.min(lastAnchorRef.current, idx);
+      const to    = Math.max(lastAnchorRef.current, idx);
+      const range = filtradas.slice(from, to + 1);
+      setCartasSelecionadas(prev => {
+        const prevRefs = new Set(prev.map(c => c.referencia));
+        return [...prev, ...range.filter(c => !prevRefs.has(c.referencia))];
+      });
+      // Âncora não muda em shift-click
+    } else {
+      // Clique normal ou Ctrl+clique: toggle individual
+      toggleSelecao(carta);
+      lastAnchorRef.current = idx;
+    }
+  }
 
   function setF(key: keyof Filtros, value: string) {
     setFiltros(f => ({ ...f, [key]: value }));
@@ -374,7 +398,7 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
               </tr>
             </thead>
             <tbody>
-              {filtradas.map(c => {
+              {filtradas.map((c, idx) => {
                 const pct = pctEntrada(c);
                 return (
                   <tr
@@ -386,7 +410,8 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
                         type="checkbox"
                         className="row-checkbox"
                         checked={selecionadasRefs.has(c.referencia)}
-                        onChange={() => toggleSelecao(c)}
+                        onChange={() => {}}
+                        onClick={(e) => handleCheckboxClick(c, idx, e)}
                         aria-label={`Selecionar cota ${c.referencia}`}
                       />
                     </td>
