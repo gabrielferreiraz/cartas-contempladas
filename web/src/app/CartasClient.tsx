@@ -105,8 +105,9 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
   }, [filtradas]);
 
   function handleCheckboxClick(carta: Carta, idx: number, e: React.MouseEvent<HTMLInputElement>) {
-    e.preventDefault(); // evita flip nativo; React controla pelo estado
     if (e.shiftKey && lastAnchorRef.current !== null) {
+      // Shift+click: range — previne toggle nativo e text-selection
+      e.preventDefault();
       const from  = Math.min(lastAnchorRef.current, idx);
       const to    = Math.max(lastAnchorRef.current, idx);
       const range = filtradas.slice(from, to + 1);
@@ -116,8 +117,7 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
       });
       // Âncora não muda em shift-click
     } else {
-      // Clique normal ou Ctrl+clique: toggle individual
-      toggleSelecao(carta);
+      // Clique normal ou Ctrl+click: só atualiza âncora; onChange faz o toggle
       lastAnchorRef.current = idx;
     }
   }
@@ -410,7 +410,7 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
                         type="checkbox"
                         className="row-checkbox"
                         checked={selecionadasRefs.has(c.referencia)}
-                        onChange={() => {}}
+                        onChange={() => toggleSelecao(c)}
                         onClick={(e) => handleCheckboxClick(c, idx, e)}
                         aria-label={`Selecionar cota ${c.referencia}`}
                       />
