@@ -99,27 +99,6 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
   const masterRef      = useRef<HTMLInputElement>(null);
   const lastAnchorRef  = useRef<number | null>(null);
 
-  // Quando filtros/sort mudam, os índices mudam — âncora perde referência
-  useEffect(() => {
-    lastAnchorRef.current = null;
-  }, [filtradas]);
-
-  function handleSel(carta: Carta, idx: number, e: React.MouseEvent) {
-    if (e.shiftKey && lastAnchorRef.current !== null) {
-      const from  = Math.min(lastAnchorRef.current, idx);
-      const to    = Math.max(lastAnchorRef.current, idx);
-      const range = filtradas.slice(from, to + 1);
-      setCartasSelecionadas(prev => {
-        const prevRefs = new Set(prev.map(c => c.referencia));
-        return [...prev, ...range.filter(c => !prevRefs.has(c.referencia))];
-      });
-      // âncora não muda no shift-click
-    } else {
-      toggleSelecao(carta);
-      lastAnchorRef.current = idx;
-    }
-  }
-
   function setF(key: keyof Filtros, value: string) {
     setFiltros(f => ({ ...f, [key]: value }));
   }
@@ -170,6 +149,26 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
         return sortDir === 'asc' ? cmp : -cmp;
       });
   }, [cartas, filtros, sortCol, sortDir]);
+
+  // Reset âncora quando filtros/sort mudam (índices mudam)
+  useEffect(() => {
+    lastAnchorRef.current = null;
+  }, [filtradas]);
+
+  function handleSel(carta: Carta, idx: number, e: React.MouseEvent) {
+    if (e.shiftKey && lastAnchorRef.current !== null) {
+      const from  = Math.min(lastAnchorRef.current, idx);
+      const to    = Math.max(lastAnchorRef.current, idx);
+      const range = filtradas.slice(from, to + 1);
+      setCartasSelecionadas(prev => {
+        const prevRefs = new Set(prev.map(c => c.referencia));
+        return [...prev, ...range.filter(c => !prevRefs.has(c.referencia))];
+      });
+    } else {
+      toggleSelecao(carta);
+      lastAnchorRef.current = idx;
+    }
+  }
 
   // Lógica do checkbox mestre — depende de filtradas, deve ficar após o useMemo
   const filtradosRefs = useMemo(() => new Set(filtradas.map(c => c.referencia)), [filtradas]);
