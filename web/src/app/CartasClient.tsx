@@ -104,10 +104,8 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
     lastAnchorRef.current = null;
   }, [filtradas]);
 
-  function handleCheckboxClick(carta: Carta, idx: number, e: React.MouseEvent<HTMLInputElement>) {
+  function handleSel(carta: Carta, idx: number, e: React.MouseEvent) {
     if (e.shiftKey && lastAnchorRef.current !== null) {
-      // Shift+click: range — previne toggle nativo e text-selection
-      e.preventDefault();
       const from  = Math.min(lastAnchorRef.current, idx);
       const to    = Math.max(lastAnchorRef.current, idx);
       const range = filtradas.slice(from, to + 1);
@@ -115,9 +113,9 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
         const prevRefs = new Set(prev.map(c => c.referencia));
         return [...prev, ...range.filter(c => !prevRefs.has(c.referencia))];
       });
-      // Âncora não muda em shift-click
+      // âncora não muda no shift-click
     } else {
-      // Clique normal ou Ctrl+click: só atualiza âncora; onChange faz o toggle
+      toggleSelecao(carta);
       lastAnchorRef.current = idx;
     }
   }
@@ -404,14 +402,19 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
                   <tr
                     key={c.referencia}
                     className={selecionadasRefs.has(c.referencia) ? 'row-selected' : ''}
+                    onMouseDown={(e) => { if (e.shiftKey) e.preventDefault(); }}
+                    onClick={(e) => {
+                      if ((e.target as HTMLElement).closest('.btn-simular')) return;
+                      handleSel(c, idx, e);
+                    }}
                   >
                     <td className="sel-col">
                       <input
                         type="checkbox"
                         className="row-checkbox"
                         checked={selecionadasRefs.has(c.referencia)}
-                        onChange={() => toggleSelecao(c)}
-                        onClick={(e) => handleCheckboxClick(c, idx, e)}
+                        onChange={() => {}}
+                        onClick={(e) => e.preventDefault()}
                         aria-label={`Selecionar cota ${c.referencia}`}
                       />
                     </td>
