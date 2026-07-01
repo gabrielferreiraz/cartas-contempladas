@@ -1886,6 +1886,16 @@ tbody tr.row-selected {
 
 .sim-cota-item:last-child { border-bottom: none; }
 
+.sim-cota-parcela {
+  font-family: var(--font-data);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--slate-400);
+  font-variant-numeric: tabular-nums;
+  flex: 1;
+  text-align: center;
+}
+
 .sim-cota-credito {
   font-family: var(--font-data);
   font-size: 0.875rem;

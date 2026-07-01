@@ -140,6 +140,7 @@ export function SimuladorVenda({ carta, onClose }: Props) {
             <div className="sim-cotas-list">
               <div className="sim-cota-item">
                 <span className="ref-badge">{carta.referencia}</span>
+                <span className="sim-cota-parcela">{fmt(carta.valor_parcela)}/mês</span>
                 <span className="sim-cota-credito">{fmt(credito)}</span>
               </div>
             </div>

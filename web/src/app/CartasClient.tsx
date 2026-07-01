@@ -347,7 +347,7 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
       {mostrarMulti && cartasSelecionadas.length > 0 && (
         <MultiSimulador
           cartas={cartasSelecionadas}
-          onClose={() => { setMostrarMulti(false); setCartasSelecionadas([]); }}
+          onClose={() => setMostrarMulti(false)}
         />
       )}
 

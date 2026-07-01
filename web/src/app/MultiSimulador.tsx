@@ -144,6 +144,7 @@ export function MultiSimulador({ cartas, onClose }: Props) {
               {cartas.map(c => (
                 <div key={c.referencia} className="sim-cota-item">
                   <span className="ref-badge">{c.referencia}</span>
+                  <span className="sim-cota-parcela">{fmt(c.valor_parcela)}/mês</span>
                   <span className="sim-cota-credito">{fmt(c.credito_atualizado)}</span>
                 </div>
               ))}
