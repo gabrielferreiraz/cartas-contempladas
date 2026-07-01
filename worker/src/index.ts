@@ -44,7 +44,9 @@ async function runAllSyncs(): Promise<void> {
 }
 
 function iniciarServidorHTTP(): void {
-  const port = parseInt(process.env.TRIGGER_PORT ?? '3001', 10);
+  // Easypanel (e plataformas similares) injetam PORT automaticamente.
+  // TRIGGER_PORT serve de fallback para desenvolvimento local.
+  const port = parseInt(process.env.PORT ?? process.env.TRIGGER_PORT ?? '3001', 10);
 
   const server = http.createServer((req, res) => {
     const url    = req.url ?? '/';

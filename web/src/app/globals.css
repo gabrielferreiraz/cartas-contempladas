@@ -112,6 +112,18 @@ header h1 {
   border-color: rgba(255,255,255,0.2);
 }
 .refresh-btn:disabled { opacity: 0.45; cursor: default; }
+.refresh-btn--erro { border-color: rgba(252,165,165,0.4); color: #fca5a5; }
+.refresh-btn--erro:hover:not(:disabled) { background: rgba(239,68,68,0.15); border-color: rgba(252,165,165,0.6); color: #fca5a5; }
+
+.refresh-error {
+  font-family: var(--font-data);
+  font-size: 0.75rem;
+  color: #fca5a5;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* ─────────────────────────────────────────────────────────────
    MAIN LAYOUT

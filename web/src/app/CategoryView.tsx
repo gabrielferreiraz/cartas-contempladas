@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { IconHouse, IconCar } from './Icons';
 import { CartasClient, type Carta } from './CartasClient';
 
 type View = null | 'imovel' | 'automovel';
@@ -40,7 +39,7 @@ export function CategoryView({ imoveis, automoveis, totais }: Props) {
         <p className="landing-subtitle">Selecione uma categoria</p>
         <div className="landing-cards">
           <button className="landing-card" onClick={() => setView('imovel')}>
-            <div className="landing-card-icon"><IconHouse /></div>
+            <div className="landing-card-icon"><img src="/home-2.svg" alt="" width={32} height={32} /></div>
             <div className="landing-card-body">
               <span className="landing-card-title">Imóvel</span>
               <span className="landing-card-count">{totais.imovel.disponivel} cartas disponíveis</span>
@@ -49,7 +48,7 @@ export function CategoryView({ imoveis, automoveis, totais }: Props) {
           </button>
 
           <button className="landing-card" onClick={() => setView('automovel')}>
-            <div className="landing-card-icon"><IconCar /></div>
+            <div className="landing-card-icon"><img src="/car.svg" alt="" width={32} height={32} /></div>
             <div className="landing-card-body">
               <span className="landing-card-title">Automóvel</span>
               <span className="landing-card-count">{totais.automovel.disponivel} cartas disponíveis</span>
