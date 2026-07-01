@@ -59,9 +59,9 @@ export function SimuladorVenda({ carta, onClose }: Props) {
   const entradaTSI   = carta.entrada            ?? 0;
   const taxaTransf   = carta.taxa_transferencia ?? 0;
   const comissao     = credito * 0.05;
-  const entrada      = entradaTSI + comissao;       // entrada exibida já inclui comissão
-  const fundoComum   = credito - entradaTSI;        // fundo comum usa entrada TSI pura
-  const saldoDevedor = (carta.valor_parcela  ?? 0) * (carta.prazo         ?? 0)
+  const entrada      = entradaTSI + comissao;
+  const fundoComum   = credito - entradaTSI;
+  const saldoDevedor = (carta.valor_parcela   ?? 0) * (carta.prazo         ?? 0)
                      + (carta.parcela_diluida ?? 0) * (carta.prazo_diluido ?? 0);
   const periods      = buildTimeline(cartaSegs(carta));
 
@@ -88,7 +88,7 @@ export function SimuladorVenda({ carta, onClose }: Props) {
             <div className="sim-grid-2">
               <div className="sim-field">
                 <span className="sim-field-label">Crédito</span>
-                <span className="sim-field-value sim-value--hero">{fmt(credito)}</span>
+                <span className="sim-field-value sim-value--hero sim-value--emerald">{fmt(credito)}</span>
               </div>
               <div className="sim-field">
                 <span className="sim-field-label">Entrada</span>
@@ -106,7 +106,7 @@ export function SimuladorVenda({ carta, onClose }: Props) {
                   {periods.map(p => (
                     <div key={p.from} className="sim-parcel-row">
                       <span className="sim-parcel-range">{p.from} à {p.to}</span>
-                      <span className="sim-parcel-val">{fmt(p.amount)}</span>
+                      <span className="sim-parcel-val sim-value--emerald">{fmt(p.amount)}</span>
                     </div>
                   ))}
                 </div>
@@ -129,6 +129,18 @@ export function SimuladorVenda({ carta, onClose }: Props) {
               <div className="sim-field">
                 <span className="sim-field-label">Fundo comum</span>
                 <span className="sim-field-value">{fmt(fundoComum)}</span>
+              </div>
+            </div>
+          </section>
+
+          <div className="sim-divider" />
+
+          <section className="sim-section">
+            <h3 className="sim-section-title">Cota selecionada</h3>
+            <div className="sim-cotas-list">
+              <div className="sim-cota-item">
+                <span className="ref-badge">{carta.referencia}</span>
+                <span className="sim-cota-credito">{fmt(credito)}</span>
               </div>
             </div>
           </section>

@@ -59,10 +59,10 @@ export function MultiSimulador({ cartas, onClose }: Props) {
   const totalEntradaTSI = cartas.reduce((s, c) => s + (c.entrada            ?? 0), 0);
   const totalTransf     = cartas.reduce((s, c) => s + (c.taxa_transferencia ?? 0), 0);
   const totalComissao   = totalCredito * 0.05;
-  const totalEntrada    = totalEntradaTSI + totalComissao; // entrada exibida já inclui comissão
-  const fundoComum      = totalCredito - totalEntradaTSI;  // fundo comum usa entrada TSI pura
+  const totalEntrada    = totalEntradaTSI + totalComissao;
+  const fundoComum      = totalCredito - totalEntradaTSI;
   const saldoDevedor    = cartas.reduce((s, c) =>
-    s + (c.valor_parcela  ?? 0) * (c.prazo         ?? 0)
+    s + (c.valor_parcela   ?? 0) * (c.prazo         ?? 0)
       + (c.parcela_diluida ?? 0) * (c.prazo_diluido ?? 0), 0);
   const periods         = buildTimeline(cartas.flatMap(cartaSegs));
 
@@ -75,7 +75,7 @@ export function MultiSimulador({ cartas, onClose }: Props) {
           <div>
             <p className="sim-header-eyebrow">Simulação Multi-Cota</p>
             <h2 className="sim-header-title">
-              {cartas.length} cotas · Crédito total {fmt(totalCredito)}
+              {cartas.length} cotas · {fmt(totalCredito)}
             </h2>
           </div>
           <button className="sim-close" onClick={onClose} aria-label="Fechar">
@@ -91,7 +91,7 @@ export function MultiSimulador({ cartas, onClose }: Props) {
             <div className="sim-grid-2">
               <div className="sim-field">
                 <span className="sim-field-label">Crédito total</span>
-                <span className="sim-field-value sim-value--hero">{fmt(totalCredito)}</span>
+                <span className="sim-field-value sim-value--hero sim-value--emerald">{fmt(totalCredito)}</span>
               </div>
               <div className="sim-field">
                 <span className="sim-field-label">Entrada total</span>
@@ -109,7 +109,7 @@ export function MultiSimulador({ cartas, onClose }: Props) {
                   {periods.map(p => (
                     <div key={p.from} className="sim-parcel-row">
                       <span className="sim-parcel-range">{p.from} à {p.to}</span>
-                      <span className="sim-parcel-val">{fmt(p.amount)}</span>
+                      <span className="sim-parcel-val sim-value--emerald">{fmt(p.amount)}</span>
                     </div>
                   ))}
                 </div>
@@ -133,6 +133,20 @@ export function MultiSimulador({ cartas, onClose }: Props) {
                 <span className="sim-field-label">Fundo comum</span>
                 <span className="sim-field-value">{fmt(fundoComum)}</span>
               </div>
+            </div>
+          </section>
+
+          <div className="sim-divider" />
+
+          <section className="sim-section">
+            <h3 className="sim-section-title">Cotas selecionadas</h3>
+            <div className="sim-cotas-list">
+              {cartas.map(c => (
+                <div key={c.referencia} className="sim-cota-item">
+                  <span className="ref-badge">{c.referencia}</span>
+                  <span className="sim-cota-credito">{fmt(c.credito_atualizado)}</span>
+                </div>
+              ))}
             </div>
           </section>
 

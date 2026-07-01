@@ -1767,3 +1767,28 @@ tbody tr.row-selected {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* valor em destaque (crédito, parcelas) */
+.sim-value--emerald { color: var(--emerald-600); }
+
+/* cotas selecionadas — rodapé do modal */
+.sim-cotas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sim-cota-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sim-cota-credito {
+  font-family: var(--font-data);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--slate-600);
+  font-variant-numeric: tabular-nums;
+}
