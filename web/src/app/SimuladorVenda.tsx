@@ -85,14 +85,14 @@ export function SimuladorVenda({ carta, onClose }: Props) {
         <div className="sim-body">
 
           <section className="sim-section">
-            <div className="sim-grid-2">
-              <div className="sim-field">
-                <span className="sim-field-label">Crédito</span>
-                <span className="sim-field-value sim-value--hero sim-value--emerald">{fmt(credito)}</span>
+            <div className="sim-hero-cards">
+              <div className="sim-hero-card sim-hero-card--credit">
+                <span className="sim-hero-label">Crédito</span>
+                <span className="sim-hero-value">{fmt(credito)}</span>
               </div>
-              <div className="sim-field">
-                <span className="sim-field-label">Entrada</span>
-                <span className="sim-field-value sim-value--hero">{fmt(entrada)}</span>
+              <div className="sim-hero-card sim-hero-card--entrada">
+                <span className="sim-hero-label">Entrada</span>
+                <span className="sim-hero-value">{fmt(entrada)}</span>
               </div>
             </div>
           </section>
@@ -105,8 +105,11 @@ export function SimuladorVenda({ carta, onClose }: Props) {
                 <div className="sim-parcel-section">
                   {periods.map(p => (
                     <div key={p.from} className="sim-parcel-row">
-                      <span className="sim-parcel-range">{p.from} à {p.to}</span>
-                      <span className="sim-parcel-val sim-value--emerald">{fmt(p.amount)}</span>
+                      <div>
+                        <div className="sim-parcel-range">Parcela mensal</div>
+                        <div className="sim-parcel-period">Mês {p.from} ao {p.to}</div>
+                      </div>
+                      <span className="sim-parcel-val">{fmt(p.amount)}</span>
                     </div>
                   ))}
                 </div>
@@ -117,18 +120,18 @@ export function SimuladorVenda({ carta, onClose }: Props) {
           <div className="sim-divider" />
 
           <section className="sim-section">
-            <div className="sim-grid-2">
-              <div className="sim-field">
-                <span className="sim-field-label">Transferência</span>
-                <span className="sim-field-value">{fmt(taxaTransf)}</span>
+            <div className="sim-secondary-list">
+              <div className="sim-secondary-item">
+                <span className="sim-secondary-key">Transferência</span>
+                <span className="sim-secondary-val">{fmt(taxaTransf)}</span>
               </div>
-              <div className="sim-field">
-                <span className="sim-field-label">Saldo devedor</span>
-                <span className="sim-field-value">{fmt(saldoDevedor)}</span>
+              <div className="sim-secondary-item">
+                <span className="sim-secondary-key">Saldo devedor</span>
+                <span className="sim-secondary-val">{fmt(saldoDevedor)}</span>
               </div>
-              <div className="sim-field">
-                <span className="sim-field-label">Fundo comum</span>
-                <span className="sim-field-value">{fmt(fundoComum)}</span>
+              <div className="sim-secondary-item">
+                <span className="sim-secondary-key">Fundo comum</span>
+                <span className="sim-secondary-val">{fmt(fundoComum)}</span>
               </div>
             </div>
           </section>

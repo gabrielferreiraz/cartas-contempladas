@@ -95,6 +95,9 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
   const totalSelecionado = cartasSelecionadas.reduce(
     (s, c) => s + (c.credito_atualizado ?? 0), 0,
   );
+  const totalParcela = cartasSelecionadas.reduce(
+    (s, c) => s + (c.valor_parcela ?? 0), 0,
+  );
 
   const masterRef      = useRef<HTMLInputElement>(null);
   const lastAnchorRef  = useRef<number | null>(null);
@@ -348,7 +351,9 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
               )}
             </span>
             <span className="selection-bar-total">
-              Crédito total: R$ {totalSelecionado.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+              Crédito: R$ {totalSelecionado.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+              {' · '}
+              Parcela: R$ {totalParcela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
           <div className="selection-bar-actions">
@@ -357,7 +362,7 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
             </button>
             <button className="selection-bar-simular" onClick={abrirSimulacao}>
               <IconCalculator />
-              {cartasSelecionadas.length === 1 ? 'Simular cota' : `Comparar ${cartasSelecionadas.length} cotas`}
+              {cartasSelecionadas.length === 1 ? 'Simular cota' : `Somar ${cartasSelecionadas.length} Cotas`}
             </button>
           </div>
         </div>
