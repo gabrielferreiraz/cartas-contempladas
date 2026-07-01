@@ -65,7 +65,7 @@ export function MultiSimulador({ cartas, onClose }: Props) {
     <>
       <div className="sim-overlay" onClick={onClose} aria-hidden="true" />
 
-      <aside className="sim-drawer sim-drawer--wide" role="dialog" aria-modal="true" aria-label="Simulação Multi-Cota">
+      <div className="sim-modal" role="dialog" aria-modal="true" aria-label="Simulação Multi-Cota">
         <div className="sim-header">
           <div>
             <p className="sim-header-eyebrow">Simulação Multi-Cota</p>
@@ -81,50 +81,58 @@ export function MultiSimulador({ cartas, onClose }: Props) {
         </div>
 
         <div className="sim-body">
-          <div className="sim-info-list">
-            <div className="sim-info-item">
-              <span className="sim-info-key">Crédito</span>
-              <span className="sim-info-val">{fmt(totalCredito)}</span>
+
+          <section className="sim-section">
+            <div className="sim-grid-2">
+              <div className="sim-field">
+                <span className="sim-field-label">Crédito total</span>
+                <span className="sim-field-value sim-value--hero">{fmt(totalCredito)}</span>
+              </div>
+              <div className="sim-field">
+                <span className="sim-field-label">Entrada total</span>
+                <span className="sim-field-value sim-value--hero">{fmt(totalEntrada)}</span>
+              </div>
             </div>
-            <div className="sim-info-item">
-              <span className="sim-info-key">Entrada</span>
-              <span className="sim-info-val">{fmt(totalEntrada)}</span>
-            </div>
-          </div>
+          </section>
 
           {periods.length > 0 && (
             <>
               <div className="sim-divider" />
-              <div className="sim-parcel-section">
-                <p className="sim-parcel-title">Parcelamento</p>
-                {periods.map(p => (
-                  <div key={p.from} className="sim-parcel-row">
-                    <span className="sim-parcel-range">{p.from} à {p.to}</span>
-                    <span className="sim-parcel-val">{fmt(p.amount)}</span>
-                  </div>
-                ))}
-              </div>
+              <section className="sim-section">
+                <h3 className="sim-section-title">Parcelamento</h3>
+                <div className="sim-parcel-section">
+                  {periods.map(p => (
+                    <div key={p.from} className="sim-parcel-row">
+                      <span className="sim-parcel-range">{p.from} à {p.to}</span>
+                      <span className="sim-parcel-val">{fmt(p.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </>
           )}
 
           <div className="sim-divider" />
 
-          <div className="sim-info-list">
-            <div className="sim-info-item">
-              <span className="sim-info-key">Transferência</span>
-              <span className="sim-info-val">{fmt(totalTransf)}</span>
+          <section className="sim-section">
+            <div className="sim-grid-2">
+              <div className="sim-field">
+                <span className="sim-field-label">Transferência</span>
+                <span className="sim-field-value">{fmt(totalTransf)}</span>
+              </div>
+              <div className="sim-field">
+                <span className="sim-field-label">Saldo devedor</span>
+                <span className="sim-field-value">{fmt(totalCredito)}</span>
+              </div>
+              <div className="sim-field">
+                <span className="sim-field-label">Fundo comum</span>
+                <span className="sim-field-value">{fmt(fundoComum)}</span>
+              </div>
             </div>
-            <div className="sim-info-item">
-              <span className="sim-info-key">Saldo devedor</span>
-              <span className="sim-info-val">{fmt(totalCredito)}</span>
-            </div>
-            <div className="sim-info-item">
-              <span className="sim-info-key">Fundo comum</span>
-              <span className="sim-info-val">{fmt(fundoComum)}</span>
-            </div>
-          </div>
+          </section>
+
         </div>
-      </aside>
+      </div>
     </>
   );
 }
