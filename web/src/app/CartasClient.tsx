@@ -76,11 +76,12 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
   );
 
   function toggleSelecao(carta: Carta) {
-    setCartasSelecionadas(prev =>
-      selecionadasRefs.has(carta.referencia)
+    setCartasSelecionadas(prev => {
+      const prevRefs = new Set(prev.map(c => c.referencia));
+      return prevRefs.has(carta.referencia)
         ? prev.filter(c => c.referencia !== carta.referencia)
-        : [...prev, carta],
-    );
+        : [...prev, carta];
+    });
   }
 
   function abrirSimulacao() {
@@ -408,7 +409,8 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
                     className={selecionadasRefs.has(c.referencia) ? 'row-selected' : ''}
                     onMouseDown={(e) => { if (e.shiftKey) e.preventDefault(); }}
                     onClick={(e) => {
-                      if ((e.target as HTMLElement).closest('.btn-simular')) return;
+                      const target = e.target as HTMLElement;
+                      if (target.closest('.btn-simular') || target.closest('.sel-col')) return;
                       handleSel(c, idx, e);
                     }}
                   >
@@ -418,7 +420,10 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
                         className="row-checkbox"
                         checked={selecionadasRefs.has(c.referencia)}
                         onChange={() => {}}
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSel(c, idx, e);
+                        }}
                         aria-label={`Selecionar cota ${c.referencia}`}
                       />
                     </td>
