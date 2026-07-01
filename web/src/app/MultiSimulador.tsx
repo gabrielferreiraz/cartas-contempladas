@@ -55,11 +55,16 @@ export function MultiSimulador({ cartas, onClose }: Props) {
     return () => { document.body.style.overflow = ''; document.removeEventListener('keydown', onKey); };
   }, [onClose]);
 
-  const totalCredito = cartas.reduce((s, c) => s + (c.credito_atualizado ?? 0), 0);
-  const totalEntrada = cartas.reduce((s, c) => s + (c.entrada            ?? 0), 0);
-  const totalTransf  = cartas.reduce((s, c) => s + (c.taxa_transferencia ?? 0), 0);
-  const fundoComum   = totalCredito - totalEntrada;
-  const periods      = buildTimeline(cartas.flatMap(cartaSegs));
+  const totalCredito    = cartas.reduce((s, c) => s + (c.credito_atualizado ?? 0), 0);
+  const totalEntradaTSI = cartas.reduce((s, c) => s + (c.entrada            ?? 0), 0);
+  const totalTransf     = cartas.reduce((s, c) => s + (c.taxa_transferencia ?? 0), 0);
+  const totalComissao   = totalCredito * 0.05;
+  const totalEntrada    = totalEntradaTSI + totalComissao; // entrada exibida já inclui comissão
+  const fundoComum      = totalCredito - totalEntradaTSI;  // fundo comum usa entrada TSI pura
+  const saldoDevedor    = cartas.reduce((s, c) =>
+    s + (c.valor_parcela  ?? 0) * (c.prazo         ?? 0)
+      + (c.parcela_diluida ?? 0) * (c.prazo_diluido ?? 0), 0);
+  const periods         = buildTimeline(cartas.flatMap(cartaSegs));
 
   return (
     <>
@@ -122,7 +127,7 @@ export function MultiSimulador({ cartas, onClose }: Props) {
               </div>
               <div className="sim-field">
                 <span className="sim-field-label">Saldo devedor</span>
-                <span className="sim-field-value">{fmt(totalCredito)}</span>
+                <span className="sim-field-value">{fmt(saldoDevedor)}</span>
               </div>
               <div className="sim-field">
                 <span className="sim-field-label">Fundo comum</span>

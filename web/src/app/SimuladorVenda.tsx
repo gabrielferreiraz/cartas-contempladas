@@ -55,11 +55,15 @@ export function SimuladorVenda({ carta, onClose }: Props) {
     return () => { document.body.style.overflow = ''; document.removeEventListener('keydown', onKey); };
   }, [onClose]);
 
-  const credito    = carta.credito_atualizado ?? 0;
-  const entrada    = carta.entrada            ?? 0;
-  const taxaTransf = carta.taxa_transferencia ?? 0;
-  const fundoComum = credito - entrada;
-  const periods    = buildTimeline(cartaSegs(carta));
+  const credito      = carta.credito_atualizado ?? 0;
+  const entradaTSI   = carta.entrada            ?? 0;
+  const taxaTransf   = carta.taxa_transferencia ?? 0;
+  const comissao     = credito * 0.05;
+  const entrada      = entradaTSI + comissao;       // entrada exibida já inclui comissão
+  const fundoComum   = credito - entradaTSI;        // fundo comum usa entrada TSI pura
+  const saldoDevedor = (carta.valor_parcela  ?? 0) * (carta.prazo         ?? 0)
+                     + (carta.parcela_diluida ?? 0) * (carta.prazo_diluido ?? 0);
+  const periods      = buildTimeline(cartaSegs(carta));
 
   return (
     <>
@@ -120,7 +124,7 @@ export function SimuladorVenda({ carta, onClose }: Props) {
               </div>
               <div className="sim-field">
                 <span className="sim-field-label">Saldo devedor</span>
-                <span className="sim-field-value">{fmt(credito)}</span>
+                <span className="sim-field-value">{fmt(saldoDevedor)}</span>
               </div>
               <div className="sim-field">
                 <span className="sim-field-label">Fundo comum</span>
