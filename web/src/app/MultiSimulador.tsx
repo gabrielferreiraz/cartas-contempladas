@@ -13,47 +13,59 @@ function fmt(v: number | null | undefined): string {
   return 'R$ ' + (v as number).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-const COMISSAO_PCT = 5;
+type Seg = { startMonth: number; endMonth: number; monthly: number };
+
+function buildTimeline(segs: Seg[]): { from: number; to: number; amount: number }[] {
+  if (segs.length === 0) return [];
+  const pts = new Set<number>();
+  for (const s of segs) { pts.add(s.startMonth); pts.add(s.endMonth + 1); }
+  const sorted = [...pts].sort((a, b) => a - b);
+  const result: { from: number; to: number; amount: number }[] = [];
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const from = sorted[i], to = sorted[i + 1] - 1;
+    const amount = segs
+      .filter(s => s.startMonth <= to && s.endMonth >= from)
+      .reduce((sum, s) => sum + s.monthly, 0);
+    if (amount > 0) result.push({ from, to, amount });
+  }
+  return result;
+}
+
+function cartaSegs(carta: Carta): Seg[] {
+  const seguro = (carta.credito_atualizado ?? 0) * 0.0004;
+  const segs: Seg[] = [];
+  if (carta.prazo && carta.valor_parcela) {
+    segs.push({ startMonth: 1, endMonth: carta.prazo, monthly: carta.valor_parcela + seguro });
+  }
+  if (carta.prazo && carta.prazo_diluido && carta.parcela_diluida) {
+    segs.push({
+      startMonth: carta.prazo + 1,
+      endMonth:   carta.prazo + carta.prazo_diluido,
+      monthly:    carta.parcela_diluida + seguro,
+    });
+  }
+  return segs;
+}
 
 export function MultiSimulador({ cartas, onClose }: Props) {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
     document.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = '';
-      document.removeEventListener('keydown', onKey);
-    };
+    return () => { document.body.style.overflow = ''; document.removeEventListener('keydown', onKey); };
   }, [onClose]);
 
-  const resultados = cartas.map(carta => {
-    const entradaTSI     = carta.entrada           ?? 0;
-    const credito        = carta.credito_atualizado ?? 0;
-    const taxaTransf     = carta.taxa_transferencia ?? 0;
-    const parcelaSemSeg  = carta.valor_parcela      ?? 0;
-    const seguroMensal   = credito * 0.0004;
-    const parcelaTotal   = parcelaSemSeg + seguroMensal;
-    const comissao       = credito * (COMISSAO_PCT / 100);
-    const valorCobrado   = entradaTSI + comissao;
-    const sinal          = entradaTSI * 0.30;
-    const totalAteTransf = valorCobrado + taxaTransf;
-    return { carta, entradaTSI, credito, taxaTransf, parcelaTotal, sinal, comissao, valorCobrado, totalAteTransf, seguroMensal, parcelaSemSeg };
-  });
-
-  const totalCredito    = cartas.reduce((s, c) => s + (c.credito_atualizado ?? 0), 0);
-  const totalEntradaTSI = cartas.reduce((s, c) => s + (c.entrada ?? 0), 0);
-  const totalComissao   = resultados.reduce((s, r) => s + r.comissao, 0);
-  const totalSinal      = resultados.reduce((s, r) => s + r.sinal, 0);
-  const totalParcelas   = resultados.reduce((s, r) => s + r.parcelaTotal, 0);
-  const totalAteTransf  = resultados.reduce((s, r) => s + r.totalAteTransf, 0);
+  const totalCredito = cartas.reduce((s, c) => s + (c.credito_atualizado ?? 0), 0);
+  const totalEntrada = cartas.reduce((s, c) => s + (c.entrada            ?? 0), 0);
+  const totalTransf  = cartas.reduce((s, c) => s + (c.taxa_transferencia ?? 0), 0);
+  const fundoComum   = totalCredito - totalEntrada;
+  const periods      = buildTimeline(cartas.flatMap(cartaSegs));
 
   return (
     <>
       <div className="sim-overlay" onClick={onClose} aria-hidden="true" />
 
       <aside className="sim-drawer sim-drawer--wide" role="dialog" aria-modal="true" aria-label="Simulação Multi-Cota">
-
-        {/* ── Header ── */}
         <div className="sim-header">
           <div>
             <p className="sim-header-eyebrow">Simulação Multi-Cota</p>
@@ -68,83 +80,49 @@ export function MultiSimulador({ cartas, onClose }: Props) {
           </button>
         </div>
 
-        {/* ── Body ── */}
         <div className="sim-body">
+          <div className="sim-info-list">
+            <div className="sim-info-item">
+              <span className="sim-info-key">Crédito</span>
+              <span className="sim-info-val">{fmt(totalCredito)}</span>
+            </div>
+            <div className="sim-info-item">
+              <span className="sim-info-key">Entrada</span>
+              <span className="sim-info-val">{fmt(totalEntrada)}</span>
+            </div>
+          </div>
 
-          {resultados.map((r, i) => (
-            <section key={r.carta.referencia} className="multi-card">
-              <div className="multi-card-header">
-                <span className="multi-card-num">{i + 1}</span>
-                <div className="multi-card-title-group">
-                  <span className="multi-card-ref">Cota {r.carta.referencia}</span>
-                  <span className="multi-card-meta">
-                    Crédito {fmt(r.credito)} · Entrada TSI {fmt(r.entradaTSI)}
-                  </span>
-                </div>
+          {periods.length > 0 && (
+            <>
+              <div className="sim-divider" />
+              <div className="sim-parcel-section">
+                <p className="sim-parcel-title">Parcelamento</p>
+                {periods.map(p => (
+                  <div key={p.from} className="sim-parcel-row">
+                    <span className="sim-parcel-range">{p.from} à {p.to}</span>
+                    <span className="sim-parcel-val">{fmt(p.amount)}</span>
+                  </div>
+                ))}
               </div>
+            </>
+          )}
 
-              <div className="multi-card-results">
-                <div className="multi-card-result-item multi-card-result-item--highlight">
-                  <span className="multi-card-result-label">Comissão ({COMISSAO_PCT}%)</span>
-                  <span className="multi-card-result-value">{fmt(r.comissao)}</span>
-                </div>
-                <div className="multi-card-result-item">
-                  <span className="multi-card-result-label">Valor cobrado</span>
-                  <span className="multi-card-result-value">{fmt(r.valorCobrado)}</span>
-                </div>
-                <div className="multi-card-result-item">
-                  <span className="multi-card-result-label">Sinal</span>
-                  <span className="multi-card-result-value">{fmt(r.sinal)}</span>
-                </div>
-                <div className="multi-card-result-item">
-                  <span className="multi-card-result-label">Parcela + seguro</span>
-                  <span className="multi-card-result-value">{fmt(r.parcelaTotal)}<span className="multi-card-result-unit">/mês</span></span>
-                </div>
-              </div>
-            </section>
-          ))}
-
-          {/* ── Resumo combinado ── */}
           <div className="sim-divider" />
 
-          <section className="sim-section">
-            <h3 className="sim-section-title">Resumo Combinado</h3>
-
-            <div className="multi-summary-grid">
-              <div className="multi-summary-item">
-                <span className="multi-summary-label">Crédito total</span>
-                <span className="multi-summary-value">{fmt(totalCredito)}</span>
-              </div>
-              <div className="multi-summary-item">
-                <span className="multi-summary-label">Entrada TSI total</span>
-                <span className="multi-summary-value">{fmt(totalEntradaTSI)}</span>
-              </div>
-              <div className="multi-summary-item multi-summary-item--highlight">
-                <span className="multi-summary-label">Comissão total ({COMISSAO_PCT}%)</span>
-                <span className="multi-summary-value multi-summary-value--emerald">{fmt(totalComissao)}</span>
-              </div>
-              <div className="multi-summary-item">
-                <span className="multi-summary-label">Sinal total</span>
-                <span className="multi-summary-value">{fmt(totalSinal)}</span>
-              </div>
-              <div className="multi-summary-item">
-                <span className="multi-summary-label">Parcelas/mês</span>
-                <span className="multi-summary-value">{fmt(totalParcelas)}</span>
-              </div>
+          <div className="sim-info-list">
+            <div className="sim-info-item">
+              <span className="sim-info-key">Transferência</span>
+              <span className="sim-info-val">{fmt(totalTransf)}</span>
             </div>
-
-            <div className="sim-summary" style={{ marginTop: '1rem' }}>
-              <div className="sim-summary-row">
-                <span>Sinal total para início dos cadastros</span>
-                <span>{fmt(totalSinal)}</span>
-              </div>
-              <div className="sim-summary-row sim-summary-row--total">
-                <span>Total até a transferência (todas as cotas)</span>
-                <span>{fmt(totalAteTransf)}</span>
-              </div>
+            <div className="sim-info-item">
+              <span className="sim-info-key">Saldo devedor</span>
+              <span className="sim-info-val">{fmt(totalCredito)}</span>
             </div>
-          </section>
-
+            <div className="sim-info-item">
+              <span className="sim-info-key">Fundo comum</span>
+              <span className="sim-info-val">{fmt(fundoComum)}</span>
+            </div>
+          </div>
         </div>
       </aside>
     </>
