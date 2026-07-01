@@ -60,7 +60,6 @@ export function SimuladorVenda({ carta, onClose }: Props) {
   const taxaTransf   = carta.taxa_transferencia ?? 0;
   const comissao     = credito * 0.05;
   const entrada      = entradaTSI + comissao;
-  const fundoComum   = credito - entradaTSI;
   const saldoDevedor = (carta.valor_parcela   ?? 0) * (carta.prazo         ?? 0)
                      + (carta.parcela_diluida ?? 0) * (carta.prazo_diluido ?? 0);
   const periods      = buildTimeline(cartaSegs(carta));
@@ -125,10 +124,6 @@ export function SimuladorVenda({ carta, onClose }: Props) {
               <div className="sim-secondary-item">
                 <span className="sim-secondary-key">Saldo devedor</span>
                 <span className="sim-secondary-val">{fmt(saldoDevedor)}</span>
-              </div>
-              <div className="sim-secondary-item">
-                <span className="sim-secondary-key">Fundo comum</span>
-                <span className="sim-secondary-val">{fmt(fundoComum)}</span>
               </div>
             </div>
           </section>

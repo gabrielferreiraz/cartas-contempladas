@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CartasClient, type Carta } from './CartasClient';
 
 type View = null | 'imovel' | 'automovel';
@@ -30,15 +30,30 @@ function BackArrow() {
   );
 }
 
+const SESSION_KEY = 'categoria_view';
+
 export function CategoryView({ imoveis, automoveis, totais }: Props) {
   const [view, setView] = useState<View>(null);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem(SESSION_KEY) as View;
+    if (saved === 'imovel' || saved === 'automovel') setView(saved);
+  }, []);
+
+  function navegar(v: View) {
+    if (v === null) sessionStorage.removeItem(SESSION_KEY);
+    else sessionStorage.setItem(SESSION_KEY, v);
+    setView(v);
+  }
 
   if (view === null) {
     return (
       <div className="landing">
+        <h1 className="landing-title">Cartas Contempladas</h1>
         <p className="landing-subtitle">Selecione uma categoria</p>
         <div className="landing-cards">
-          <button className="landing-card" onClick={() => setView('imovel')}>
+          <button className="landing-card" onClick={() => navegar('imovel')}>
+            <img src="/logo-servopa.svg" alt="Servopa" className="landing-card-servopa" />
             <div className="landing-card-icon"><img src="/home-2.svg" alt="" width={32} height={32} /></div>
             <div className="landing-card-body">
               <span className="landing-card-title">Imóvel</span>
@@ -47,7 +62,8 @@ export function CategoryView({ imoveis, automoveis, totais }: Props) {
             <span className="landing-card-arrow"><ArrowRight /></span>
           </button>
 
-          <button className="landing-card" onClick={() => setView('automovel')}>
+          <button className="landing-card" onClick={() => navegar('automovel')}>
+            <img src="/logo-servopa.svg" alt="Servopa" className="landing-card-servopa" />
             <div className="landing-card-icon"><img src="/car.svg" alt="" width={32} height={32} /></div>
             <div className="landing-card-body">
               <span className="landing-card-title">Automóvel</span>
@@ -67,7 +83,7 @@ export function CategoryView({ imoveis, automoveis, totais }: Props) {
   return (
     <div>
       <div className="cat-page-header">
-        <button className="cat-page-back" onClick={() => setView(null)}>
+        <button className="cat-page-back" onClick={() => navegar(null)}>
           <BackArrow />
           Voltar
         </button>

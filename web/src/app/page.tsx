@@ -62,6 +62,8 @@ export default async function Page() {
       <header>
         <div className="header-brand">
           <img src="/logo reobote.png" alt="Reobote" className="header-logo" />
+          <div className="header-brand-divider" />
+          <img src="/logo-servopa.svg" alt="Servopa" className="header-logo header-logo--servopa" />
         </div>
         <div className="header-right">
           <div className="status-bar">
@@ -69,9 +71,6 @@ export default async function Page() {
               <span className={`status-badge ${badgeClass}`}>{badgeLabel}</span>
             )}
             <RefreshControl iso={lastSync} />
-          </div>
-          <div className="header-partner">
-            <img src="/logo-servopa.svg" alt="Servopa" className="header-logo header-logo--servopa" />
           </div>
         </div>
       </header>

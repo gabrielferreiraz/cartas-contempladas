@@ -379,8 +379,73 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
         </div>
       )}
 
-      {/* ── Tabela ── */}
-      <div className="table-wrap">
+      {/* ── Cards mobile ── */}
+      {filtradas.length === 0 ? (
+        <div className="empty mobile-only">Nenhuma carta encontrada com os filtros aplicados.</div>
+      ) : (
+        <div className="mobile-cards">
+          {filtradas.map((c, idx) => {
+            const eCalc = entradaCalc(c);
+            const selecionada = selecionadasRefs.has(c.referencia);
+            return (
+              <div
+                key={c.referencia}
+                className={`mobile-card${selecionada ? ' mobile-card--selected' : ''}`}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('.mobile-card-action') || target.closest('.mobile-card-check')) return;
+                  handleSel(c, idx, e);
+                }}
+              >
+                <div className="mobile-card-top">
+                  <div className="mobile-card-check">
+                    <input
+                      type="checkbox"
+                      className="row-checkbox"
+                      checked={selecionada}
+                      onChange={() => {}}
+                      onClick={(e) => { e.stopPropagation(); handleSel(c, idx, e); }}
+                    />
+                  </div>
+                  <span className="ref-badge">{c.referencia}</span>
+                </div>
+
+                <div className="mobile-card-grid">
+                  <div className="mobile-card-field">
+                    <span className="mobile-card-label">Crédito</span>
+                    <span className="mobile-card-value mobile-card-value--credit">{fmt(c.credito_atualizado)}</span>
+                  </div>
+                  <div className="mobile-card-field">
+                    <span className="mobile-card-label">Entrada</span>
+                    <span className="mobile-card-value">{fmt(eCalc)}</span>
+                  </div>
+                  <div className="mobile-card-field">
+                    <span className="mobile-card-label">Parcela</span>
+                    <span className="mobile-card-value mobile-card-value--parcela">{fmt(c.valor_parcela)}</span>
+                  </div>
+                  <div className="mobile-card-field">
+                    <span className="mobile-card-label">Prazo</span>
+                    <span className="mobile-card-value">{c.prazo ? `${c.prazo}x` : '—'}</span>
+                  </div>
+                </div>
+
+                <div className="mobile-card-footer">
+                  <button
+                    className="mobile-card-action btn-simular"
+                    onClick={() => setCartaSelecionada(c)}
+                  >
+                    <IconCalculator />
+                    Simular
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Tabela (desktop) ── */}
+      <div className="table-wrap desktop-only">
         {filtradas.length === 0 ? (
           <div className="empty">Nenhuma carta encontrada com os filtros aplicados.</div>
         ) : (
@@ -450,7 +515,7 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
                     <td className="sim-col">
                       <button className="btn-simular" onClick={() => setCartaSelecionada(c)}>
                         <IconCalculator />
-                        Simular
+                        <span className="btn-simular-label">Simular</span>
                       </button>
                     </td>
                   </tr>

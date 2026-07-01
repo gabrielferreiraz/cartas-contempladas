@@ -60,7 +60,6 @@ export function MultiSimulador({ cartas, onClose }: Props) {
   const totalTransf     = cartas.reduce((s, c) => s + (c.taxa_transferencia ?? 0), 0);
   const totalComissao   = totalCredito * 0.05;
   const totalEntrada    = totalEntradaTSI + totalComissao;
-  const fundoComum      = totalCredito - totalEntradaTSI;
   const saldoDevedor    = cartas.reduce((s, c) =>
     s + (c.valor_parcela   ?? 0) * (c.prazo         ?? 0)
       + (c.parcela_diluida ?? 0) * (c.prazo_diluido ?? 0), 0);
@@ -128,10 +127,6 @@ export function MultiSimulador({ cartas, onClose }: Props) {
               <div className="sim-secondary-item">
                 <span className="sim-secondary-key">Saldo devedor</span>
                 <span className="sim-secondary-val">{fmt(saldoDevedor)}</span>
-              </div>
-              <div className="sim-secondary-item">
-                <span className="sim-secondary-key">Fundo comum</span>
-                <span className="sim-secondary-val">{fmt(fundoComum)}</span>
               </div>
             </div>
           </section>
