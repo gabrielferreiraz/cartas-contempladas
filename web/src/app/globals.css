@@ -813,9 +813,9 @@ th.sim-col, td.sim-col {
 .sim-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.38);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 200;
   animation: sim-overlay-in 0.2s ease;
 }
@@ -1519,4 +1519,174 @@ tbody tr.row-selected {
   font-size: 0.8375rem;
   line-height: 1.5;
   max-width: 280px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LANDING PAGE — seleção de categoria
+───────────────────────────────────────────────────────────── */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3.5rem 0;
+  gap: 1.5rem;
+}
+
+.landing-subtitle {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--slate-400);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.landing-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 600px;
+}
+
+.landing-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1.5px solid var(--slate-200);
+  padding: 2rem 1.75rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.875rem;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  text-align: left;
+}
+.landing-card:hover {
+  border-color: var(--slate-400);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.landing-card-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--slate-900);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.landing-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.landing-card-title {
+  font-family: var(--font-ui);
+  font-size: 1.1875rem;
+  font-weight: 700;
+  color: var(--slate-900);
+  display: block;
+}
+
+.landing-card-count {
+  font-size: 0.8125rem;
+  color: var(--slate-500);
+  display: block;
+}
+
+.landing-card-arrow {
+  color: var(--slate-300);
+  margin-top: 0.25rem;
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, transform 0.15s;
+}
+.landing-card:hover .landing-card-arrow {
+  color: var(--slate-700);
+  transform: translateX(3px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CATEGORY PAGE HEADER
+───────────────────────────────────────────────────────────── */
+.cat-page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.cat-page-back {
+  background: transparent;
+  border: 1.5px solid var(--slate-200);
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--slate-500);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cat-page-back:hover { border-color: var(--slate-400); color: var(--slate-700); }
+
+.cat-page-title {
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e3a5f;
+  letter-spacing: -0.02em;
+}
+
+.cat-page-count {
+  margin-left: auto;
+  font-size: 0.8125rem;
+  color: var(--slate-400);
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SIMULADOR — MODAL CENTRADO
+───────────────────────────────────────────────────────────── */
+@keyframes sim-modal-in {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.97); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.sim-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 201;
+  width: calc(100% - 2rem);
+  max-width: 520px;
+  max-height: 88vh;
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: sim-modal-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sim-modal .sim-header {
+  border-radius: 1.25rem 1.25rem 0 0;
+}
+
+.sim-modal .sim-body {
+  overflow-y: auto;
 }

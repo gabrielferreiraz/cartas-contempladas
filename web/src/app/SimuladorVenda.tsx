@@ -88,7 +88,7 @@ export function SimuladorVenda({ carta, onClose }: Props) {
     <>
       <div className="sim-overlay" onClick={onClose} aria-hidden="true" />
 
-      <aside className="sim-drawer" role="dialog" aria-modal="true" aria-label="Simulação de Venda">
+      <div className="sim-modal" role="dialog" aria-modal="true" aria-label="Simulação de Venda">
 
         {/* ── Header ── */}
         <div className="sim-header">
@@ -325,7 +325,7 @@ export function SimuladorVenda({ carta, onClose }: Props) {
           )}
 
         </div>
-      </aside>
+      </div>
     </>
   );
 }
