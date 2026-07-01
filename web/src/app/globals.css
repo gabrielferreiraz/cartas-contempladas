@@ -62,12 +62,31 @@ header {
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
-header h1 {
-  font-family: var(--font-ui);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #fff;
+.header-brand {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.header-logo--servopa {
+  height: 28px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.header-partner {
+  display: flex;
+  align-items: center;
 }
 
 .status-bar { display: flex; align-items: center; gap: 0.75rem; }
@@ -1590,6 +1609,13 @@ tbody tr.row-selected {
   align-items: center;
   justify-content: center;
   color: #fff;
+}
+
+.landing-card-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 .landing-card-body {

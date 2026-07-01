@@ -60,12 +60,19 @@ export default async function Page() {
   return (
     <>
       <header>
-        <h1>Cartas Contempladas</h1>
-        <div className="status-bar">
-          {badgeLabel && (
-            <span className={`status-badge ${badgeClass}`}>{badgeLabel}</span>
-          )}
-          <RefreshControl iso={lastSync} />
+        <div className="header-brand">
+          <img src="/logo reobote.png" alt="Reobote" className="header-logo" />
+        </div>
+        <div className="header-right">
+          <div className="status-bar">
+            {badgeLabel && (
+              <span className={`status-badge ${badgeClass}`}>{badgeLabel}</span>
+            )}
+            <RefreshControl iso={lastSync} />
+          </div>
+          <div className="header-partner">
+            <img src="/logo-servopa.svg" alt="Servopa" className="header-logo header-logo--servopa" />
+          </div>
         </div>
       </header>
 
