@@ -51,9 +51,16 @@ function fmtData(d: string | null): string {
   const [y, m, day] = d.split('-');
   return `${day}/${m}/${y}`;
 }
+function entradaCalc(c: Carta): number | null {
+  if (c.credito_atualizado === null && c.entrada === null) return null;
+  return (c.entrada ?? 0) + (c.credito_atualizado ?? 0) * 0.05;
+}
+
 function pctEntrada(c: Carta): number | null {
   if (!c.credito_atualizado || !c.entrada) return null;
-  return (c.entrada / c.credito_atualizado) * 100;
+  const calc = entradaCalc(c);
+  if (calc === null) return null;
+  return (calc / c.credito_atualizado) * 100;
 }
 
 function SortIcon({ col, sortCol, sortDir }: { col: SortCol; sortCol: SortCol; sortDir: 'asc' | 'desc' }) {
@@ -134,7 +141,7 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
         }
         if (creditoMin !== null && (c.credito_atualizado ?? 0) < creditoMin) return false;
         if (creditoMax !== null && (c.credito_atualizado ?? 0) > creditoMax) return false;
-        if (entradaMax !== null && (c.entrada ?? Infinity) > entradaMax) return false;
+        if (entradaMax !== null && (entradaCalc(c) ?? Infinity) > entradaMax) return false;
         if (parcelaMax !== null && (c.valor_parcela ?? Infinity) > parcelaMax) return false;
         if (prazoMax   !== null && (c.prazo ?? Infinity) > prazoMax) return false;
         return true;
@@ -145,6 +152,9 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
         if (sortCol === 'pct_entrada') {
           av = pctEntrada(a) ?? -1;
           bv = pctEntrada(b) ?? -1;
+        } else if (sortCol === 'entrada') {
+          av = entradaCalc(a) ?? (sortDir === 'asc' ? Infinity : -Infinity);
+          bv = entradaCalc(b) ?? (sortDir === 'asc' ? Infinity : -Infinity);
         } else {
           av = a[sortCol] ?? (sortDir === 'asc' ? Infinity : -Infinity);
           bv = b[sortCol] ?? (sortDir === 'asc' ? Infinity : -Infinity);
@@ -429,7 +439,7 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
                     </td>
                     <td><span className="ref-badge">{c.referencia}</span></td>
                     <td className="right">{fmt(c.credito_atualizado)}</td>
-                    <td className="right">{fmt(c.entrada)}</td>
+                    <td className="right">{fmt(entradaCalc(c))}</td>
                     <td className="right pct">{pct !== null ? `${pct.toFixed(1)}%` : '—'}</td>
                     <td className="right">{c.prazo ? `${c.prazo}m` : '—'}</td>
                     <td className="right">{fmt(c.valor_parcela)}</td>

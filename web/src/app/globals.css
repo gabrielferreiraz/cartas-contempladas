@@ -953,7 +953,7 @@ th.sim-col, td.sim-col {
 }
 
 .sim-value--hero {
-  font-size: 1rem;
+  font-size: 1.3125rem;
   font-weight: 700;
   color: var(--slate-900);
 }
@@ -1795,20 +1795,19 @@ tbody tr.row-selected {
 
 .sim-parcel-row {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.6rem 1rem;
+  padding: 0.5rem 0.875rem;
   background: var(--slate-50);
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid var(--slate-100);
-  border-left: 3px solid #34d399;
 }
 
 .sim-parcel-range {
-  font-family: var(--font-ui);
+  font-family: var(--font-data);
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--slate-500);
   white-space: nowrap;
 }
@@ -1822,12 +1821,11 @@ tbody tr.row-selected {
 
 .sim-parcel-val {
   font-family: var(--font-data);
-  font-size: 1.1875rem;
-  font-weight: 800;
-  color: #059669;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--slate-900);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  letter-spacing: -0.01em;
 }
 
 /* ── Info secundária ───────── */
