@@ -111,8 +111,9 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
   const lastAnchorRef = useRef<number | null>(null);
   const dragHandleRef = useCallback((handle: HTMLDivElement | null) => {
     if (!handle) return;
-    const bar = handle.closest<HTMLDivElement>('.selection-bar');
-    if (!bar) return;
+    const found = handle.closest<HTMLDivElement>('.selection-bar');
+    if (!found) return;
+    const bar: HTMLDivElement = found;
 
     let startY: number | null = null;
     let dy = 0;
