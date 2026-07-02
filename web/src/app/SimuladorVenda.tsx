@@ -34,16 +34,15 @@ function buildTimeline(segs: Seg[]): { from: number; to: number; amount: number 
 }
 
 function cartaSegs(carta: Carta): Seg[] {
-  const seguro = (carta.credito_atualizado ?? 0) * 0.0004;
   const segs: Seg[] = [];
   if (carta.prazo && carta.valor_parcela) {
-    segs.push({ startMonth: 1, endMonth: carta.prazo, monthly: carta.valor_parcela + seguro });
+    segs.push({ startMonth: 1, endMonth: carta.prazo, monthly: carta.valor_parcela });
   }
   if (carta.prazo && carta.prazo_diluido && carta.parcela_diluida) {
     segs.push({
       startMonth: carta.prazo + 1,
       endMonth:   carta.prazo + carta.prazo_diluido,
-      monthly:    carta.parcela_diluida + seguro,
+      monthly:    carta.parcela_diluida,
     });
   }
   return segs;
