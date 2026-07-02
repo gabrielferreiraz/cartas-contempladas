@@ -117,12 +117,14 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
 
     let startY = 0;
     let active = false;
+    let threshold = 60;
 
     handle.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       handle.setPointerCapture(e.pointerId);
       startY = e.clientY;
       active = true;
+      threshold = bar.offsetHeight * 0.2;
       bar.style.transition = 'none';
     });
 
@@ -138,7 +140,7 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
       if (!active) return;
       active = false;
       const dy = e.clientY - startY;
-      if (dy > 60) {
+      if (dy > threshold) {
         setCartasSelecionadas([]);
       } else {
         bar.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
