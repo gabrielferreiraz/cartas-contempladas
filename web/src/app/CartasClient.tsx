@@ -115,38 +115,40 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
     if (!found) return;
     const bar: HTMLDivElement = found;
 
-    let startY: number | null = null;
-    let dy = 0;
+    let startY = 0;
+    let active = false;
 
-    function onStart(e: TouchEvent) {
+    handle.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      startY = e.touches[0].clientY;
-      dy = 0;
+      handle.setPointerCapture(e.pointerId);
+      startY = e.clientY;
+      active = true;
       bar.style.transition = 'none';
-    }
-    function onMove(e: TouchEvent) {
-      if (startY === null) return;
-      e.preventDefault();
-      const delta = e.touches[0].clientY - startY;
-      if (delta <= 0) return;
-      dy = delta;
+    });
+
+    handle.addEventListener('pointermove', (e) => {
+      if (!active) return;
+      const dy = e.clientY - startY;
+      if (dy <= 0) return;
       bar.style.transform = `translateY(${dy}px)`;
       bar.style.opacity = String(Math.max(0.2, 1 - dy / 120));
-    }
-    function onEnd() {
-      if (dy > 60) setCartasSelecionadas([]);
-      else {
+    });
+
+    function onRelease(e: PointerEvent) {
+      if (!active) return;
+      active = false;
+      const dy = e.clientY - startY;
+      if (dy > 60) {
+        setCartasSelecionadas([]);
+      } else {
         bar.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
         bar.style.transform = '';
         bar.style.opacity = '';
       }
-      startY = null;
-      dy = 0;
     }
 
-    handle.addEventListener('touchstart', onStart, { passive: false });
-    handle.addEventListener('touchmove', onMove, { passive: false });
-    handle.addEventListener('touchend', onEnd);
+    handle.addEventListener('pointerup', onRelease);
+    handle.addEventListener('pointercancel', onRelease);
   }, []);
 
   function setF(key: keyof Filtros, value: string) {
