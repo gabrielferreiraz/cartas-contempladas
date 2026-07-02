@@ -1521,7 +1521,10 @@ tbody tr.row-selected {
   gap: 1.5rem;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.25);
   animation: sel-bar-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-  touch-action: none;
+}
+
+.selection-bar-handle {
+  display: none;
 }
 
 .selection-bar-info {
@@ -2486,6 +2489,27 @@ tbody tr.row-selected {
     right: 0;
     bottom: 0;
     position: fixed;
+  }
+
+  .selection-bar-handle {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .selection-bar-handle::before {
+    content: '';
+    width: 32px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.25);
   }
 
   .selection-bar-info {

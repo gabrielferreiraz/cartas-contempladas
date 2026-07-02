@@ -109,46 +109,43 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
 
   const masterRef = useRef<HTMLInputElement>(null);
   const lastAnchorRef = useRef<number | null>(null);
-  const dragRef = useCallback((el: HTMLDivElement | null) => {
-    console.log('[drag] callbackRef chamado — el:', el);
-    if (!el) return;
-    const div: HTMLDivElement = el;
+  const dragHandleRef = useCallback((handle: HTMLDivElement | null) => {
+    if (!handle) return;
+    const bar = handle.closest<HTMLDivElement>('.selection-bar');
+    if (!bar) return;
 
     let startY: number | null = null;
     let dy = 0;
 
     function onStart(e: TouchEvent) {
-      console.log('[drag] touchstart y:', e.touches[0].clientY);
+      e.preventDefault();
       startY = e.touches[0].clientY;
       dy = 0;
-      div.style.transition = 'none';
+      bar.style.transition = 'none';
     }
     function onMove(e: TouchEvent) {
       if (startY === null) return;
       e.preventDefault();
       const delta = e.touches[0].clientY - startY;
-      console.log('[drag] touchmove delta:', delta);
       if (delta <= 0) return;
       dy = delta;
-      div.style.transform = `translateY(${dy}px)`;
-      div.style.opacity = String(Math.max(0.2, 1 - dy / 120));
+      bar.style.transform = `translateY(${dy}px)`;
+      bar.style.opacity = String(Math.max(0.2, 1 - dy / 120));
     }
     function onEnd() {
-      console.log('[drag] touchend dy:', dy);
       if (dy > 60) setCartasSelecionadas([]);
       else {
-        div.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
-        div.style.transform = '';
-        div.style.opacity = '';
+        bar.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+        bar.style.transform = '';
+        bar.style.opacity = '';
       }
       startY = null;
       dy = 0;
     }
 
-    console.log('[drag] adicionando listeners');
-    div.addEventListener('touchstart', onStart, { passive: false });
-    div.addEventListener('touchmove', onMove, { passive: false });
-    div.addEventListener('touchend', onEnd);
+    handle.addEventListener('touchstart', onStart, { passive: false });
+    handle.addEventListener('touchmove', onMove, { passive: false });
+    handle.addEventListener('touchend', onEnd);
   }, []);
 
   function setF(key: keyof Filtros, value: string) {
@@ -395,10 +392,8 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
 
       {/* ── Barra de seleção flutuante ── */}
       {cartasSelecionadas.length > 0 && !mostrarMulti && (
-        <div
-          className="selection-bar"
-          ref={dragRef}
-        >
+        <div className="selection-bar">
+          <div className="selection-bar-handle" ref={dragHandleRef} />
           <div className="selection-bar-info">
             <span className="selection-bar-count">
               {cartasSelecionadas.length} {cartasSelecionadas.length === 1 ? 'cota selecionada' : 'cotas selecionadas'}
