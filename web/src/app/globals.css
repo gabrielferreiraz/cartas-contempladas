@@ -2641,12 +2641,19 @@ tbody tr.row-selected {
     margin: 1.3cm 1.5cm;
   }
 
+  html, body {
+    width: 180mm;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   body>*:not(.print-layout) {
     display: none !important;
   }
 
   .print-layout {
     display: block;
+    width: 100%;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 9.5pt;
     color: #1e1e2e;
