@@ -110,35 +110,50 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
   const masterRef = useRef<HTMLInputElement>(null);
   const lastAnchorRef = useRef<number | null>(null);
   const selBarRef = useRef<HTMLDivElement>(null);
-  const dragStartYRef = useRef<number | null>(null);
-  const dragDyRef = useRef<number>(0);
 
-  function onSelBarTouchStart(e: React.TouchEvent) {
-    dragStartYRef.current = e.touches[0].clientY;
-    dragDyRef.current = 0;
-    if (selBarRef.current) selBarRef.current.style.transition = 'none';
-  }
-  function onSelBarTouchMove(e: React.TouchEvent) {
-    if (dragStartYRef.current === null) return;
-    const dy = e.touches[0].clientY - dragStartYRef.current;
-    if (dy <= 0) return;
-    dragDyRef.current = dy;
-    if (selBarRef.current) {
-      selBarRef.current.style.transform = `translateY(${dy}px)`;
-      selBarRef.current.style.opacity = String(Math.max(0.2, 1 - dy / 120));
+  const barVisible = cartasSelecionadas.length > 0 && !mostrarMulti;
+  useEffect(() => {
+    const el = selBarRef.current;
+    if (!el) return;
+
+    let startY: number | null = null;
+    let dy = 0;
+
+    function onStart(e: TouchEvent) {
+      startY = e.touches[0].clientY;
+      dy = 0;
+      el.style.transition = 'none';
     }
-  }
-  function onSelBarTouchEnd() {
-    if (dragDyRef.current > 60) {
-      setCartasSelecionadas([]);
-    } else if (selBarRef.current) {
-      selBarRef.current.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
-      selBarRef.current.style.transform = '';
-      selBarRef.current.style.opacity = '';
+    function onMove(e: TouchEvent) {
+      if (startY === null) return;
+      e.preventDefault();
+      const delta = e.touches[0].clientY - startY;
+      if (delta <= 0) return;
+      dy = delta;
+      el.style.transform = `translateY(${dy}px)`;
+      el.style.opacity = String(Math.max(0.2, 1 - dy / 120));
     }
-    dragStartYRef.current = null;
-    dragDyRef.current = 0;
-  }
+    function onEnd() {
+      if (dy > 60) {
+        setCartasSelecionadas([]);
+      } else {
+        el.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+        el.style.transform = '';
+        el.style.opacity = '';
+      }
+      startY = null;
+      dy = 0;
+    }
+
+    el.addEventListener('touchstart', onStart, { passive: true });
+    el.addEventListener('touchmove', onMove, { passive: false });
+    el.addEventListener('touchend', onEnd);
+    return () => {
+      el.removeEventListener('touchstart', onStart);
+      el.removeEventListener('touchmove', onMove);
+      el.removeEventListener('touchend', onEnd);
+    };
+  }, [barVisible]);
 
   function setF(key: keyof Filtros, value: string) {
     setFiltros(f => ({ ...f, [key]: value }));
@@ -387,9 +402,6 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
         <div
           className="selection-bar"
           ref={selBarRef}
-          onTouchStart={onSelBarTouchStart}
-          onTouchMove={onSelBarTouchMove}
-          onTouchEnd={onSelBarTouchEnd}
         >
           <div className="selection-bar-info">
             <span className="selection-bar-count">
