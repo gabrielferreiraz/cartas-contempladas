@@ -38,13 +38,6 @@ function cartaSegs(carta: Carta): Seg[] {
   if (carta.prazo && carta.valor_parcela) {
     segs.push({ startMonth: 1, endMonth: carta.prazo, monthly: carta.valor_parcela });
   }
-  if (carta.prazo && carta.prazo_diluido && carta.parcela_diluida) {
-    segs.push({
-      startMonth: carta.prazo + 1,
-      endMonth:   carta.prazo + carta.prazo_diluido,
-      monthly:    carta.parcela_diluida,
-    });
-  }
   return segs;
 }
 
@@ -62,8 +55,7 @@ export function MultiSimulador({ cartas, categoria, onClose }: Props) {
   const totalComissao   = totalCredito * 0.05;
   const totalEntrada    = totalEntradaTSI + totalComissao;
   const saldoDevedor    = cartas.reduce((s, c) =>
-    s + (c.valor_parcela   ?? 0) * (c.prazo         ?? 0)
-      + (c.parcela_diluida ?? 0) * (c.prazo_diluido ?? 0), 0);
+    s + (c.valor_parcela ?? 0) * (c.prazo ?? 0), 0);
   const periods         = buildTimeline(cartas.flatMap(cartaSegs));
 
   return (

@@ -2642,7 +2642,10 @@ tbody tr.row-selected {
   }
 
   html, body {
-    width: 180mm;
+    width: 180mm !important;
+    min-width: 0 !important;
+    max-width: 180mm !important;
+    overflow: visible !important;
     margin: 0 !important;
     padding: 0 !important;
   }

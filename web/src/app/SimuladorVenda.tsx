@@ -38,13 +38,6 @@ function cartaSegs(carta: Carta): Seg[] {
   if (carta.prazo && carta.valor_parcela) {
     segs.push({ startMonth: 1, endMonth: carta.prazo, monthly: carta.valor_parcela });
   }
-  if (carta.prazo && carta.prazo_diluido && carta.parcela_diluida) {
-    segs.push({
-      startMonth: carta.prazo + 1,
-      endMonth:   carta.prazo + carta.prazo_diluido,
-      monthly:    carta.parcela_diluida,
-    });
-  }
   return segs;
 }
 
@@ -61,8 +54,7 @@ export function SimuladorVenda({ carta, categoria, onClose }: Props) {
   const taxaTransf   = carta.taxa_transferencia ?? 0;
   const comissao     = credito * 0.05;
   const entrada      = entradaTSI + comissao;
-  const saldoDevedor = (carta.valor_parcela   ?? 0) * (carta.prazo         ?? 0)
-                     + (carta.parcela_diluida ?? 0) * (carta.prazo_diluido ?? 0);
+  const saldoDevedor = (carta.valor_parcela ?? 0) * (carta.prazo ?? 0);
   const periods      = buildTimeline(cartaSegs(carta));
 
   return (
