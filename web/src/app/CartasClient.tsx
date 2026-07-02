@@ -120,26 +120,30 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
     let dy = 0;
 
     function onStart(e: TouchEvent) {
+      const t = selBarRef.current;
+      if (!t) return;
       startY = e.touches[0].clientY;
       dy = 0;
-      el.style.transition = 'none';
+      t.style.transition = 'none';
     }
     function onMove(e: TouchEvent) {
-      if (startY === null) return;
+      const t = selBarRef.current;
+      if (!t || startY === null) return;
       e.preventDefault();
       const delta = e.touches[0].clientY - startY;
       if (delta <= 0) return;
       dy = delta;
-      el.style.transform = `translateY(${dy}px)`;
-      el.style.opacity = String(Math.max(0.2, 1 - dy / 120));
+      t.style.transform = `translateY(${dy}px)`;
+      t.style.opacity = String(Math.max(0.2, 1 - dy / 120));
     }
     function onEnd() {
+      const t = selBarRef.current;
       if (dy > 60) {
         setCartasSelecionadas([]);
-      } else {
-        el.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
-        el.style.transform = '';
-        el.style.opacity = '';
+      } else if (t) {
+        t.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+        t.style.transform = '';
+        t.style.opacity = '';
       }
       startY = null;
       dy = 0;
