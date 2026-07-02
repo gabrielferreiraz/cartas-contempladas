@@ -2654,7 +2654,7 @@ tbody tr.row-selected {
   /* Título do documento — âncora visual principal */
   .pl-doc-title {
     display: block;
-    font-family: var(--font-ui);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 15pt;
     font-weight: 700;
     color: #0d2545;
@@ -2668,7 +2668,7 @@ tbody tr.row-selected {
     display: inline-flex;
     align-items: center;
     gap: 3pt;
-    font-family: var(--font-ui);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 7.5pt;
     font-weight: 600;
     color: #5a6a82;
