@@ -68,7 +68,7 @@ function SortIcon({ col, sortCol, sortDir }: { col: SortCol; sortCol: SortCol; s
   return <span className="sort-icon active">{sortDir === 'asc' ? <IconSortUp /> : <IconSortDown />}</span>;
 }
 
-export function CartasClient({ cartas }: { cartas: Carta[] }) {
+export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria: 'imovel' | 'automovel' }) {
   const [filtros, setFiltros] = useState<Filtros>(VAZIO);
   const [sortCol, setSortCol] = useState<SortCol>('credito_atualizado');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -341,12 +341,13 @@ export function CartasClient({ cartas }: { cartas: Carta[] }) {
       )}
 
       {cartaSelecionada && (
-        <SimuladorVenda carta={cartaSelecionada} onClose={() => setCartaSelecionada(null)} />
+        <SimuladorVenda carta={cartaSelecionada} categoria={categoria} onClose={() => setCartaSelecionada(null)} />
       )}
 
       {mostrarMulti && cartasSelecionadas.length > 0 && (
         <MultiSimulador
           cartas={cartasSelecionadas}
+          categoria={categoria}
           onClose={() => setMostrarMulti(false)}
         />
       )}

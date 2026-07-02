@@ -10,10 +10,10 @@ export function IconHouse() {
 export function IconCar() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M5 17H3v-4l2.5-6.5A2 2 0 0 1 7.4 5H16.6a2 2 0 0 1 1.9 1.5L21 13v4h-2"/>
-      <circle cx="7" cy="17" r="2"/>
-      <circle cx="17" cy="17" r="2"/>
-      <path d="M5 13h14"/>
+      <path d="M7 7h10l3 6H4l3-6z"/>
+      <path d="M2 13h20v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-3z"/>
+      <circle cx="6.5" cy="17.5" r="1.5"/>
+      <circle cx="17.5" cy="17.5" r="1.5"/>
     </svg>
   );
 }

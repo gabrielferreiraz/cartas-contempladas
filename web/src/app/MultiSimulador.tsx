@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react';
 import type { Carta } from './CartasClient';
+import { SimPrintLayout } from './SimPrintLayout';
 
 interface Props {
   cartas: Carta[];
+  categoria: 'imovel' | 'automovel';
   onClose: () => void;
 }
 
@@ -47,7 +49,7 @@ function cartaSegs(carta: Carta): Seg[] {
   return segs;
 }
 
-export function MultiSimulador({ cartas, onClose }: Props) {
+export function MultiSimulador({ cartas, categoria, onClose }: Props) {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
@@ -77,11 +79,19 @@ export function MultiSimulador({ cartas, onClose }: Props) {
               {cartas.length} cotas · {fmt(totalCredito)}
             </h2>
           </div>
-          <button className="sim-close" onClick={onClose} aria-label="Fechar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
+          <div className="sim-header-actions">
+            <button className="sim-pdf-btn" onClick={() => window.print()} aria-label="Gerar PDF">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              Gerar PDF
+            </button>
+            <button className="sim-close" onClick={onClose} aria-label="Fechar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="sim-body">
@@ -119,14 +129,14 @@ export function MultiSimulador({ cartas, onClose }: Props) {
           <div className="sim-divider" />
 
           <section className="sim-section">
-            <div className="sim-secondary-list">
-              <div className="sim-secondary-item">
-                <span className="sim-secondary-key">Transferência</span>
-                <span className="sim-secondary-val">{fmt(totalTransf)}</span>
+            <div className="sim-grid-2">
+              <div className="sim-field">
+                <span className="sim-field-label">Transferência</span>
+                <span className="sim-field-value sim-value--emphasis">{fmt(totalTransf)}</span>
               </div>
-              <div className="sim-secondary-item">
-                <span className="sim-secondary-key">Saldo devedor</span>
-                <span className="sim-secondary-val">{fmt(saldoDevedor)}</span>
+              <div className="sim-field">
+                <span className="sim-field-label">Saldo devedor</span>
+                <span className="sim-field-value sim-value--emphasis">{fmt(saldoDevedor)}</span>
               </div>
             </div>
           </section>
@@ -147,6 +157,19 @@ export function MultiSimulador({ cartas, onClose }: Props) {
           </section>
 
         </div>
+
+        <SimPrintLayout
+          titulo={`Simulação Multi-Cota — ${cartas.length} cotas`}
+          categoria={categoria}
+          credito={totalCredito}
+          creditoLabel="Crédito total"
+          entrada={totalEntrada}
+          entradaLabel="Entrada total"
+          transferencia={totalTransf}
+          saldoDevedor={saldoDevedor}
+          periods={periods}
+          cotas={cartas.map(c => ({ referencia: c.referencia, prazo: c.prazo, credito: c.credito_atualizado, valor_parcela: c.valor_parcela }))}
+        />
       </div>
     </>
   );

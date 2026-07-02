@@ -91,7 +91,7 @@ export function CategoryView({ imoveis, automoveis, totais }: Props) {
         <span className="cat-page-count">{count} disponíveis</span>
       </div>
 
-      <CartasClient cartas={dados.disponiveis} />
+      <CartasClient cartas={dados.disponiveis} categoria={view} />
     </div>
   );
 }
