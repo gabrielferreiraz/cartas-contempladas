@@ -107,8 +107,38 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
     (s, c) => s + (c.valor_parcela ?? 0), 0,
   );
 
-  const masterRef      = useRef<HTMLInputElement>(null);
-  const lastAnchorRef  = useRef<number | null>(null);
+  const masterRef = useRef<HTMLInputElement>(null);
+  const lastAnchorRef = useRef<number | null>(null);
+  const selBarRef = useRef<HTMLDivElement>(null);
+  const dragStartYRef = useRef<number | null>(null);
+  const dragDyRef = useRef<number>(0);
+
+  function onSelBarTouchStart(e: React.TouchEvent) {
+    dragStartYRef.current = e.touches[0].clientY;
+    dragDyRef.current = 0;
+    if (selBarRef.current) selBarRef.current.style.transition = 'none';
+  }
+  function onSelBarTouchMove(e: React.TouchEvent) {
+    if (dragStartYRef.current === null) return;
+    const dy = e.touches[0].clientY - dragStartYRef.current;
+    if (dy <= 0) return;
+    dragDyRef.current = dy;
+    if (selBarRef.current) {
+      selBarRef.current.style.transform = `translateY(${dy}px)`;
+      selBarRef.current.style.opacity = String(Math.max(0.2, 1 - dy / 120));
+    }
+  }
+  function onSelBarTouchEnd() {
+    if (dragDyRef.current > 60) {
+      setCartasSelecionadas([]);
+    } else if (selBarRef.current) {
+      selBarRef.current.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+      selBarRef.current.style.transform = '';
+      selBarRef.current.style.opacity = '';
+    }
+    dragStartYRef.current = null;
+    dragDyRef.current = 0;
+  }
 
   function setF(key: keyof Filtros, value: string) {
     setFiltros(f => ({ ...f, [key]: value }));
@@ -129,7 +159,7 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
     const creditoMax = filtros.creditoMax ? +filtros.creditoMax : null;
     const entradaMax = filtros.entradaMax ? +filtros.entradaMax : null;
     const parcelaMax = filtros.parcelaMax ? +filtros.parcelaMax : null;
-    const prazoMax   = filtros.prazoMax   ? +filtros.prazoMax   : null;
+    const prazoMax = filtros.prazoMax ? +filtros.prazoMax : null;
     const buscaValor = filtros.busca.length >= 3 ? Number(filtros.busca) : null;
 
     return cartas
@@ -143,7 +173,7 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
         if (creditoMax !== null && (c.credito_atualizado ?? 0) > creditoMax) return false;
         if (entradaMax !== null && (entradaCalc(c) ?? Infinity) > entradaMax) return false;
         if (parcelaMax !== null && (c.valor_parcela ?? Infinity) > parcelaMax) return false;
-        if (prazoMax   !== null && (c.prazo ?? Infinity) > prazoMax) return false;
+        if (prazoMax !== null && (c.prazo ?? Infinity) > prazoMax) return false;
         return true;
       })
       .sort((a, b) => {
@@ -171,8 +201,8 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
 
   function handleSel(carta: Carta, idx: number, e: React.MouseEvent) {
     if (e.shiftKey && lastAnchorRef.current !== null) {
-      const from  = Math.min(lastAnchorRef.current, idx);
-      const to    = Math.max(lastAnchorRef.current, idx);
+      const from = Math.min(lastAnchorRef.current, idx);
+      const to = Math.max(lastAnchorRef.current, idx);
       const range = filtradas.slice(from, to + 1);
       setCartasSelecionadas(prev => {
         const prevRefs = new Set(prev.map(c => c.referencia));
@@ -208,11 +238,11 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
     label: `Créd. ~R$ ${Number(filtros.busca).toLocaleString('pt-BR')}`,
     key: 'busca',
   });
-  if (filtros.creditoMin) chips.push({ label: `Créd. ≥ ${fmtCompacto(+filtros.creditoMin)}`,   key: 'creditoMin' });
-  if (filtros.creditoMax) chips.push({ label: `Créd. ≤ ${fmtCompacto(+filtros.creditoMax)}`,   key: 'creditoMax' });
+  if (filtros.creditoMin) chips.push({ label: `Créd. ≥ ${fmtCompacto(+filtros.creditoMin)}`, key: 'creditoMin' });
+  if (filtros.creditoMax) chips.push({ label: `Créd. ≤ ${fmtCompacto(+filtros.creditoMax)}`, key: 'creditoMax' });
   if (filtros.entradaMax) chips.push({ label: `Entrada ≤ ${fmtCompacto(+filtros.entradaMax)}`, key: 'entradaMax' });
   if (filtros.parcelaMax) chips.push({ label: `Parcela ≤ ${fmtCompacto(+filtros.parcelaMax)}`, key: 'parcelaMax' });
-  if (filtros.prazoMax)   chips.push({ label: `Prazo ≤ ${filtros.prazoMax}m`,                  key: 'prazoMax' });
+  if (filtros.prazoMax) chips.push({ label: `Prazo ≤ ${filtros.prazoMax}m`, key: 'prazoMax' });
 
   function th(col: SortCol, label: string, className = 'right sortable') {
     return (
@@ -354,7 +384,13 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
 
       {/* ── Barra de seleção flutuante ── */}
       {cartasSelecionadas.length > 0 && !mostrarMulti && (
-        <div className="selection-bar">
+        <div
+          className="selection-bar"
+          ref={selBarRef}
+          onTouchStart={onSelBarTouchStart}
+          onTouchMove={onSelBarTouchMove}
+          onTouchEnd={onSelBarTouchEnd}
+        >
           <div className="selection-bar-info">
             <span className="selection-bar-count">
               {cartasSelecionadas.length} {cartasSelecionadas.length === 1 ? 'cota selecionada' : 'cotas selecionadas'}
@@ -363,9 +399,9 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
               )}
             </span>
             <span className="selection-bar-total">
-              Crédito: R$ {totalSelecionado.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+              Créd: R$ {totalSelecionado.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
               {' · '}
-              Parcela: R$ {totalParcela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              Parc: R$ {totalParcela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
           <div className="selection-bar-actions">
@@ -404,7 +440,7 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
                       type="checkbox"
                       className="row-checkbox"
                       checked={selecionada}
-                      onChange={() => {}}
+                      onChange={() => { }}
                       onClick={(e) => { e.stopPropagation(); handleSel(c, idx, e); }}
                     />
                   </div>
@@ -428,6 +464,18 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
                     <span className="mobile-card-label">Prazo</span>
                     <span className="mobile-card-value">{c.prazo ? `${c.prazo}x` : '—'}</span>
                   </div>
+                  {c.prazo_diluido && (
+                    <>
+                      <div className="mobile-card-field">
+                        <span className="mobile-card-label">Prazo Diluído</span>
+                        <span className="mobile-card-value">{c.prazo_diluido}x</span>
+                      </div>
+                      <div className="mobile-card-field">
+                        <span className="mobile-card-label">Parcela Diluída</span>
+                        <span className="mobile-card-value mobile-card-value--parcela">{fmt(c.parcela_diluida)}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="mobile-card-footer">
@@ -495,7 +543,7 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
                         type="checkbox"
                         className="row-checkbox"
                         checked={selecionadasRefs.has(c.referencia)}
-                        onChange={() => {}}
+                        onChange={() => { }}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSel(c, idx, e);

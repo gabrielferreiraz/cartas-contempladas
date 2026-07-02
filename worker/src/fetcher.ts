@@ -13,9 +13,12 @@ export async function fetchCSV(url: string): Promise<FetchResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
+  const bustUrl = new URL(url);
+  bustUrl.searchParams.set('_t', Date.now().toString());
+
   let response: Response;
   try {
-    response = await fetch(url, { signal: controller.signal });
+    response = await fetch(bustUrl.toString(), { signal: controller.signal });
   } catch (err) {
     throw new Error(`Falha na requisição HTTP: ${(err as Error).message}`);
   } finally {
