@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IconSearch, IconSliders, IconSortNeutral, IconSortUp, IconSortDown, IconX, IconCalculator } from './Icons';
 import { SimuladorVenda } from './SimuladorVenda';
 import { MultiSimulador } from './MultiSimulador';
@@ -109,55 +109,47 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
 
   const masterRef = useRef<HTMLInputElement>(null);
   const lastAnchorRef = useRef<number | null>(null);
-  const selBarRef = useRef<HTMLDivElement>(null);
-
-  const barVisible = cartasSelecionadas.length > 0 && !mostrarMulti;
-  useEffect(() => {
-    const el = selBarRef.current;
+  const dragRef = useCallback((el: HTMLDivElement | null) => {
+    console.log('[drag] callbackRef chamado — el:', el);
     if (!el) return;
+    const div: HTMLDivElement = el;
 
     let startY: number | null = null;
     let dy = 0;
 
     function onStart(e: TouchEvent) {
-      const t = selBarRef.current;
-      if (!t) return;
+      console.log('[drag] touchstart y:', e.touches[0].clientY);
       startY = e.touches[0].clientY;
       dy = 0;
-      t.style.transition = 'none';
+      div.style.transition = 'none';
     }
     function onMove(e: TouchEvent) {
-      const t = selBarRef.current;
-      if (!t || startY === null) return;
+      if (startY === null) return;
       e.preventDefault();
       const delta = e.touches[0].clientY - startY;
+      console.log('[drag] touchmove delta:', delta);
       if (delta <= 0) return;
       dy = delta;
-      t.style.transform = `translateY(${dy}px)`;
-      t.style.opacity = String(Math.max(0.2, 1 - dy / 120));
+      div.style.transform = `translateY(${dy}px)`;
+      div.style.opacity = String(Math.max(0.2, 1 - dy / 120));
     }
     function onEnd() {
-      const t = selBarRef.current;
-      if (dy > 60) {
-        setCartasSelecionadas([]);
-      } else if (t) {
-        t.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
-        t.style.transform = '';
-        t.style.opacity = '';
+      console.log('[drag] touchend dy:', dy);
+      if (dy > 60) setCartasSelecionadas([]);
+      else {
+        div.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+        div.style.transform = '';
+        div.style.opacity = '';
       }
       startY = null;
       dy = 0;
     }
 
-    el.addEventListener('touchstart', onStart, { passive: true });
-    el.addEventListener('touchmove', onMove, { passive: false });
-    el.addEventListener('touchend', onEnd);
-    return () => {
-      el.removeEventListener('touchstart', onStart);
-      el.removeEventListener('touchmove', onMove);
-      el.removeEventListener('touchend', onEnd);
-    };
-  }, [barVisible]);
+    console.log('[drag] adicionando listeners');
+    div.addEventListener('touchstart', onStart, { passive: false });
+    div.addEventListener('touchmove', onMove, { passive: false });
+    div.addEventListener('touchend', onEnd);
+  }, []);
 
   function setF(key: keyof Filtros, value: string) {
     setFiltros(f => ({ ...f, [key]: value }));
@@ -405,7 +397,7 @@ export function CartasClient({ cartas, categoria }: { cartas: Carta[]; categoria
       {cartasSelecionadas.length > 0 && !mostrarMulti && (
         <div
           className="selection-bar"
-          ref={selBarRef}
+          ref={dragRef}
         >
           <div className="selection-bar-info">
             <span className="selection-bar-count">
