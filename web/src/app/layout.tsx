@@ -20,7 +20,9 @@ export const metadata: Metadata = {
   title: 'Cartas Contempladas',
   description: 'Cartas de crédito de consórcio disponíveis',
   icons: {
-    icon: [{ url: '/Sem%20t%C3%ADtulo.svg', type: 'image/svg+xml' }],
+    icon: [
+      { url: '/logo%20reobote%201.svg', type: 'image/svg+xml' },
+    ],
   },
 };
 
