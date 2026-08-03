@@ -1,0 +1,17 @@
+{
+  "name": "cartas-contempladas",
+  "private": true,
+  "workspaces": [
+    "cartas-contempladas-main/web",
+    "cartas-contempladas-main/worker"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w cartas-web",
+    "build": "npm run build -w cartas-web",
+    "start": "npm run start -w cartas-web",
+    "lint": "npm run lint -w cartas-web",
+    "dev:worker": "npm run dev -w cartas-worker",
+    "build:worker": "npm run build -w cartas-worker",
+    "start:worker": "npm run start -w cartas-worker"
+  }
+}
