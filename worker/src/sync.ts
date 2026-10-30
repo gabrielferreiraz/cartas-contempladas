@@ -18,7 +18,18 @@ import {
 } from './database.js';
 import { logger } from './logger.js';
 
-export async function runSync(tipo: 'imovel' | 'automovel', csvUrl: string): Promise<void> {
+export type TipoCarta = 'imovel' | 'automovel';
+
+export interface SyncResultado {
+  tipo: TipoCarta;
+  status: 'sucesso' | 'erro' | 'ignorado';
+  novas?: number;
+  vendidas?: number;
+  total?: number;
+  erro?: string;
+}
+
+export async function runSync(tipo: TipoCarta, csvUrl: string): Promise<SyncResultado> {
   const iniciado_em = new Date().toISOString();
   const inicio = Date.now();
   const soldThreshold = parseInt(process.env.SOLD_THRESHOLD ?? '2', 10);
@@ -30,12 +41,12 @@ export async function runSync(tipo: 'imovel' | 'automovel', csvUrl: string): Pro
     lockAcquired = await tryAdvisoryLock(lockId);
   } catch (err) {
     logger.warn('advisory_lock_falhou', { tipo, message: (err as Error).message });
-    return;
+    return { tipo, status: 'erro', erro: 'Falha ao obter lock de sincronização' };
   }
 
   if (!lockAcquired) {
     logger.info('sync_pulado_lock_ocupado', { tipo });
-    return;
+    return { tipo, status: 'ignorado' };
   }
 
   let checksum: string | undefined;
@@ -58,7 +69,7 @@ export async function runSync(tipo: 'imovel' | 'automovel', csvUrl: string): Pro
         mensagem_erro: msg,
         stack_erro: stack,
       });
-      return;
+      return { tipo, status: 'erro', erro: msg };
     }
 
     // PASSO 3 — Parse e Validação (antecipado para viabilizar checagem de ausentes)
@@ -74,7 +85,7 @@ export async function runSync(tipo: 'imovel' | 'automovel', csvUrl: string): Pro
         checksum_csv: checksum,
         mensagem_erro: msg,
       });
-      return;
+      return { tipo, status: 'erro', erro: msg };
     }
 
     if (cartas.length === 0) {
@@ -87,7 +98,7 @@ export async function runSync(tipo: 'imovel' | 'automovel', csvUrl: string): Pro
         checksum_csv: checksum,
         mensagem_erro: msg,
       });
-      return;
+      return { tipo, status: 'erro', erro: msg };
     }
 
     // PASSO 4 — Checksum (chave escopada por tipo)
@@ -124,7 +135,7 @@ export async function runSync(tipo: 'imovel' | 'automovel', csvUrl: string): Pro
           status: 'ignorado',
           checksum_csv: checksum,
         });
-        return;
+        return { tipo, status: 'ignorado', total: cartas.length };
       }
 
       // Há cotas ausentes — contabiliza e marca vendidas se atingiu threshold
@@ -160,7 +171,7 @@ export async function runSync(tipo: 'imovel' | 'automovel', csvUrl: string): Pro
         status: 'ignorado',
         checksum_csv: checksum,
       });
-      return;
+      return { tipo, status: 'ignorado', total: cartas.length, vendidas: totalMarcadas };
     }
 
     if (linhasIgnoradas > 0) {
@@ -247,6 +258,7 @@ export async function runSync(tipo: 'imovel' | 'automovel', csvUrl: string): Pro
           pendentes_proximo_sync: pendentes,
         });
       }
+      return { tipo, status: 'sucesso', novas: diff.novas.length, vendidas: totalMarcadas, total: cartas.length };
     } catch (err) {
       const msg = (err as Error).message;
       const stack = (err as Error).stack;
@@ -259,6 +271,7 @@ export async function runSync(tipo: 'imovel' | 'automovel', csvUrl: string): Pro
         mensagem_erro: msg,
         stack_erro: stack,
       });
+      return { tipo, status: 'erro', erro: msg };
     }
   } finally {
     // PASSO 8 — Libera lock SEMPRE

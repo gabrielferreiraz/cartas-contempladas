@@ -13,12 +13,53 @@ function calcular(iso: string | null): string {
 
 type Estado = 'idle' | 'sincronizando' | 'atualizando' | 'erro';
 
+interface ResultadoTipo {
+  tipo: 'imovel' | 'automovel';
+  status: 'sucesso' | 'erro' | 'ignorado';
+  novas?: number;
+  vendidas?: number;
+  total?: number;
+  erro?: string;
+}
+
+interface Aviso {
+  linhas: { tipo: ResultadoTipo['tipo']; ok: boolean; texto: string }[];
+  temErro: boolean;
+}
+
+const NOME_TIPO = { imovel: 'Imóveis', automovel: 'Automóveis' } as const;
+
+function descrever(r: ResultadoTipo): string {
+  if (r.status === 'erro') return `erro — ${r.erro ?? 'falha na sincronização'}`;
+  if (r.status === 'ignorado') return 'sem alterações';
+  const partes = [`${r.novas ?? 0} nova(s)`];
+  if (r.vendidas) partes.push(`${r.vendidas} vendida(s)`);
+  return `atualizado (${partes.join(', ')})`;
+}
+
+function montarAviso(resultados: Record<string, ResultadoTipo> | null): Aviso | null {
+  if (!resultados) return null;
+  const linhas = (['imovel', 'automovel'] as const)
+    .map((t) => resultados[t])
+    .filter(Boolean)
+    .map((r) => ({ tipo: r.tipo, ok: r.status !== 'erro', texto: descrever(r) }));
+  return { linhas, temErro: linhas.some((l) => !l.ok) };
+}
+
 export function RefreshControl({ iso }: { iso: string | null }) {
   const router  = useRouter();
   const isoRef  = useRef(iso);
   const [texto,   setTexto]   = useState(() => calcular(iso));
   const [estado,  setEstado]  = useState<Estado>('idle');
   const [erroMsg, setErroMsg] = useState<string | null>(null);
+  const [aviso,   setAviso]   = useState<Aviso | null>(null);
+
+  // Popup de sucesso some sozinho; se houver erro, fica até o usuário fechar.
+  useEffect(() => {
+    if (!aviso || aviso.temErro) return;
+    const id = setTimeout(() => setAviso(null), 5000);
+    return () => clearTimeout(id);
+  }, [aviso]);
 
   useEffect(() => {
     isoRef.current = iso;
@@ -40,6 +81,8 @@ export function RefreshControl({ iso }: { iso: string | null }) {
         signal: AbortSignal.timeout(40_000),
       });
       if (res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setAviso(body.ocupado ? null : montarAviso(body.resultados ?? null));
         const agora = new Date().toISOString();
         isoRef.current = agora;
         setTexto('agora mesmo');
@@ -76,6 +119,27 @@ export function RefreshControl({ iso }: { iso: string | null }) {
       >
         {label}
       </button>
+      {aviso && (
+        <div
+          className={`sync-toast${aviso.temErro ? ' sync-toast--erro' : ''}`}
+          role="status"
+        >
+          <ul>
+            {aviso.linhas.map((l) => (
+              <li key={l.tipo} className={l.ok ? 'sync-toast__ok' : 'sync-toast__erro'}>
+                <strong>{NOME_TIPO[l.tipo]}:</strong> {l.texto}
+              </li>
+            ))}
+          </ul>
+          <button
+            className="sync-toast__fechar"
+            onClick={() => setAviso(null)}
+            aria-label="Fechar aviso"
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   );
 }

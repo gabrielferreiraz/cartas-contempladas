@@ -26,7 +26,12 @@ export async function POST() {
       );
     }
 
-    return NextResponse.json({ ok: true });
+    const body = await res.json().catch(() => ({}));
+    return NextResponse.json({
+      ok: true,
+      ocupado: body.ocupado ?? false,
+      resultados: body.resultados ?? null,
+    });
   } catch (err) {
     return NextResponse.json(
       { ok: false, error: (err as Error).message },

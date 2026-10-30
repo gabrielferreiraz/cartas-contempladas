@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import http from 'node:http';
 import cron from 'node-cron';
-import { runSync } from './sync.js';
+import { runSync, SyncResultado, TipoCarta } from './sync.js';
 import { logger } from './logger.js';
 
 const REQUIRED_ENV = [
@@ -21,23 +21,29 @@ function validateEnv(): void {
 
 let syncRunning = false;
 
-async function runAllSyncs(): Promise<void> {
+export type ResultadosSync = Record<TipoCarta, SyncResultado>;
+
+async function syncSeguro(tipo: TipoCarta, url: string): Promise<SyncResultado> {
+  try {
+    return await runSync(tipo, url);
+  } catch (err) {
+    const message = (err as Error).message;
+    logger.error(`sync_${tipo}_erro_inesperado`, { message });
+    return { tipo, status: 'erro', erro: message };
+  }
+}
+
+async function runAllSyncs(): Promise<ResultadosSync | null> {
   if (syncRunning) {
     logger.info('sync_ignorado_ja_em_andamento');
-    return;
+    return null;
   }
   syncRunning = true;
   try {
-    const imoveisUrl   = process.env.SHEETS_IMOVEIS_CSV_URL!;
-    const automovelUrl = process.env.SHEETS_AUTOMOVEIS_CSV_URL!;
-
-    await runSync('imovel', imoveisUrl).catch((err: Error) => {
-      logger.error('sync_imovel_erro_inesperado', { message: err.message });
-    });
-
-    await runSync('automovel', automovelUrl).catch((err: Error) => {
-      logger.error('sync_automovel_erro_inesperado', { message: err.message });
-    });
+    // Falha em um tipo não impede o outro: cada resultado é isolado.
+    const imovel    = await syncSeguro('imovel',    process.env.SHEETS_IMOVEIS_CSV_URL!);
+    const automovel = await syncSeguro('automovel', process.env.SHEETS_AUTOMOVEIS_CSV_URL!);
+    return { imovel, automovel };
   } finally {
     syncRunning = false;
   }
@@ -63,9 +69,9 @@ function iniciarServidorHTTP(): void {
     if (method === 'POST' && url === '/sync') {
       logger.info('sync_manual_solicitado');
       runAllSyncs()
-        .then(() => {
+        .then((resultados) => {
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ ok: true }));
+          res.end(JSON.stringify({ ok: true, ocupado: resultados === null, resultados }));
         })
         .catch((err: Error) => {
           logger.error('sync_manual_erro', { message: err.message });
