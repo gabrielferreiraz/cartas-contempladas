@@ -73,7 +73,7 @@ export async function runSync(tipo: TipoCarta, csvUrl: string): Promise<SyncResu
     }
 
     // PASSO 3 — Parse e Validação (antecipado para viabilizar checagem de ausentes)
-    const { cartas, headersValidos, totalLinhasBrutas, linhasIgnoradas } = parseCSV(csvContent);
+    const { cartas, headersValidos, totalLinhasBrutas, linhasIgnoradas, erroEstrutura } = parseCSV(csvContent);
 
     if (!headersValidos) {
       const msg = 'Headers do CSV não correspondem ao schema esperado';
@@ -86,6 +86,18 @@ export async function runSync(tipo: TipoCarta, csvUrl: string): Promise<SyncResu
         mensagem_erro: msg,
       });
       return { tipo, status: 'erro', erro: msg };
+    }
+
+    if (erroEstrutura) {
+      logger.error('parse_falhou_estrutura', { tipo, msg: erroEstrutura });
+      await inserirSyncLog({
+        iniciado_em,
+        finalizado_em: new Date().toISOString(),
+        status: 'erro',
+        checksum_csv: checksum,
+        mensagem_erro: erroEstrutura,
+      });
+      return { tipo, status: 'erro', erro: erroEstrutura };
     }
 
     if (cartas.length === 0) {

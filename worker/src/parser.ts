@@ -37,6 +37,8 @@ export interface ParseResult {
   headersValidos: boolean;
   totalLinhasBrutas: number;
   linhasIgnoradas: number;
+  /** Preenchido quando a planilha tem estrutura fora do formato (linhas de parcela, TOTAL, colunas extras). */
+  erroEstrutura?: string;
 }
 
 export function parseCSV(csvContent: string): ParseResult {
@@ -70,12 +72,15 @@ export function parseCSV(csvContent: string): ParseResult {
 
   const totalLinhasBrutas = resultado.data.length;
   let linhasIgnoradas = 0;
+  let linhasOrfas = 0;
   const cartas: CartaNormalizada[] = [];
 
   for (const linha of resultado.data as unknown as CartaCSV[]) {
     const ref = linha.Referencia?.trim();
     if (!ref) {
       linhasIgnoradas++;
+      // Linha sem referência mas com conteúdo (parcela extra, "TOTAL"...) indica planilha fora do formato
+      if (Object.values(linha).some((v) => (v ?? '').toString().trim() !== '')) linhasOrfas++;
       logger.warn('linha_sem_referencia', { linha });
       continue;
     }
@@ -94,10 +99,26 @@ export function parseCSV(csvContent: string): ParseResult {
     });
   }
 
+  const colunasExtras = headers.filter(
+    (h) => h.trim() !== '' && !(HEADERS_CANONICOS as string[]).includes(h),
+  );
+
+  const problemas: string[] = [];
+  if (linhasOrfas > 0) {
+    problemas.push(`${linhasOrfas} linha(s) com dados mas sem referência (parcelas extras ou TOTAL)`);
+  }
+  if (colunasExtras.length > 0) {
+    problemas.push(`colunas fora do formato: ${colunasExtras.join(', ')}`);
+  }
+  const erroEstrutura = problemas.length > 0
+    ? `Estrutura da planilha inválida: ${problemas.join('; ')}`
+    : undefined;
+
   return {
     cartas,
     headersValidos: true,
     totalLinhasBrutas,
     linhasIgnoradas,
+    erroEstrutura,
   };
 }
