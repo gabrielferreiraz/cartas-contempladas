@@ -48,7 +48,8 @@ export function parseCSV(csvContent: string): ParseResult {
       const normalized = h.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
       // Normaliza variações de case/acento ("Referência", "REFERÊNCIA", etc.)
       const low = normalized.toLowerCase();
-      if (low === 'referência' || low === 'referencia') return 'Referencia';
+      // "Coluna 1" é o nome padrão que o Google Sheets dá à primeira coluna de uma Tabela sem título
+      if (low === 'referência' || low === 'referencia' || low === 'coluna 1') return 'Referencia';
       return normalized;
     },
   });
